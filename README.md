@@ -1,6 +1,6 @@
 # Hoax
 
-A LISP-like language inspired by (Ruse)[https://github.com/thep1geon/ruse] which
+A LISP-like language inspired by [Ruse](https://github.com/thep1geon/ruse) which
 is inspired by Scheme.
 
 ## The Motivation
@@ -56,7 +56,7 @@ present in Ruse.
 
 ### Crafting Interpreters
 
-I've read (Crafting Interpreters)[https://craftinginterpreters.com/] a few
+I've read [Crafting Interpreters](https://craftinginterpreters.com/) a few
 times actually, but I have never made a interpreted language which compiles to
 a virtual machine's byte code. This will be a good exercise.
 

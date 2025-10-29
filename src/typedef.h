@@ -21,6 +21,6 @@ typedef ssize_t isize;
 
 typedef float       f32;
 typedef double      f64;
-typedef long double f80;
+typedef long double f128; /*, or at least on my machine. */
 
 #endif  /* __TYPEDEF_H */

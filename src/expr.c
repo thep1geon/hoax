@@ -1,0 +1,94 @@
+#include <stdio.h>
+
+#include "expr.h"
+
+DYNARRAY_IMPL_S(expr);
+
+struct dynarray(expr) exprs = {0};
+
+u32 expr_new() {
+    struct expr expr = {0};
+
+    /* The dynarray is too full for our needs */
+    /* We have to be careful of overflowing our u32 */
+    if (exprs.length >= (usize)(1 << 31)) {
+        assert(0 && "We need to fix this asap!");
+        return 0;
+    }
+
+    dynarray__expr_push(&exprs, expr);
+
+    return exprs.length - 1;
+}
+
+u32 expr_new_nil() {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_NIL;
+
+    return ptr;
+}
+
+u32 expr_new_integer(i64 integer) {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_INTEGER;
+    exprs.at[ptr].integer = integer;
+
+    return ptr;
+}
+
+u32 expr_new_symbol(char* symbol, u8 length) {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_SYMBOL;
+    exprs.at[ptr].symbol = symbol;
+    exprs.at[ptr].length = length;
+
+    return ptr;
+}
+
+u32 expr_new_cons(u32 car, u32 cdr) {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_CONS;
+    exprs.at[ptr].car = car;
+    exprs.at[ptr].cdr = cdr;
+
+    return ptr;
+}
+
+/* Takes an index (pointer) into the expr array and returns the associated expr */
+#define EXPR(ptr) exprs.at[(ptr)]
+
+#define CAR(e) EXPR((e).car)
+#define CDR(e) EXPR((e).cdr)
+
+u8 nilp(struct expr expr) { return expr.type == E_NIL; }
+u8 integerp(struct expr expr) { return expr.type == E_INTEGER; }
+u8 symbolp(struct expr expr) { return expr.type == E_SYMBOL; }
+u8 consp(struct expr expr) { return expr.type == E_CONS; }
+
+void expr_print(struct expr expr) {
+    switch ((enum expr_type) expr.type) {
+        case E_NIL:
+            printf("nil");
+            break;
+        case E_INTEGER:
+            printf("%ld", expr.integer);
+            break;
+        case E_SYMBOL:
+            printf("%.*s", (i32)expr.length, expr.symbol);
+            break;
+        case E_CONS:
+            printf("(");
+            expr_print(CAR(expr));
+            printf(" . ");
+            expr_print(CDR(expr));
+            printf(")");
+            break;
+        case E_TYPE_COUNT:
+            assert(0 && "???");
+            break;
+    }
+}

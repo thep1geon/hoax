@@ -6,26 +6,38 @@
 #include "common.h"
 #include "expr.h"
 #include "reader.h"
+#include "module.h"
+#include "vm.h"
+#include "compiler.h"
 
 i32 main(i32 argc, char** argv) {
     UNUSED(argc);
     UNUSED(argv);
 
-    struct expr expr;
-    struct slice(char) src = STRING("(42)\n(6 7)\n(= 42 (* 6 7))\n3\n(cons 6 7)");
+    expr_new_nil();
+
+    struct vm vm = vm_create();
+    struct module module = {0};
+
+    struct slice(char) src = STRING("(display)\n(display (display))\n(display (+ (+ 3 2) 7))\n(display 42)");
     struct expr_reader reader = reader_create(src);
     u32 ptr = 0;
 
     printf("-=-=-=-=-=-=-Source=-=-=-=-=-=-=\n%.*s\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n", (i32)reader.src.length, src.ptr);
 
-    expr_new_nil();
-
     while ((ptr = read_expr(&reader)) != 0) {
-        expr = EXPR(ptr);
-        printf("(location %d %d) ", expr.loc.line, expr.loc.column);
-        expr_print(expr);
-        putchar('\n');
+        module.code.length = 0;
+        module.constants.length = 0;
+
+        compile(&module, EXPR(ptr));
+
+        vm_load_module(&vm, &module);
+        vm_run(&vm);
     }
+
+    vm_destroy(&vm);
+    module_destroy(&module);
+
 
     DYNARRAY_FREE(&exprs);
 

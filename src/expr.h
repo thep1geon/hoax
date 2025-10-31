@@ -44,11 +44,16 @@ DYNARRAY_DECL_S(expr);
 extern struct dynarray(expr) exprs;
 
 u32 expr_new();
-
 u32 expr_new_nil();
 u32 expr_new_integer(i64 integer);
 u32 expr_new_symbol(char* symbol, u8 length);
 u32 expr_new_cons(u32 car, u32 cdr);
+
+struct expr expr_create();
+struct expr expr_create_nil();
+struct expr expr_create_integer(i64 integer);
+struct expr expr_create_symbol(char* symbol, u8 length);
+struct expr expr_create_cons(u32 car, u32 cdr);
 
 /* Takes an index (pointer) into the expr array and returns the associated expr */
 #define EXPR(ptr) exprs.at[(ptr)]
@@ -62,5 +67,6 @@ u8 symbolp(struct expr expr);
 u8 consp(struct expr expr);
 
 void expr_print(struct expr expr);
+void expr_println(struct expr expr);
 
 #endif  /*__EXPR_H*/

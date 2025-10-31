@@ -58,6 +58,43 @@ u32 expr_new_cons(u32 car, u32 cdr) {
     return ptr;
 }
 
+struct expr expr_create() {
+    return (struct expr){0};
+}
+
+struct expr expr_create_nil() {
+    struct expr expr = expr_create();
+    expr.type = E_NIL;
+
+    return expr;
+}
+
+struct expr expr_create_integer(i64 integer) {
+    struct expr expr = expr_create();
+    expr.type = E_INTEGER;
+    expr.integer = integer;
+
+    return expr;
+}
+
+struct expr expr_create_symbol(char* symbol, u8 length) {
+    struct expr expr = expr_create();
+    expr.type = E_SYMBOL;
+    expr.symbol = symbol;
+    expr.length = length;
+
+    return expr;
+}
+
+struct expr expr_create_cons(u32 car, u32 cdr) {
+    struct expr expr = expr_create();
+    expr.type = E_CONS;
+    expr.car = car;
+    expr.cdr = cdr;
+
+    return expr;
+}
+
 /* Takes an index (pointer) into the expr array and returns the associated expr */
 #define EXPR(ptr) exprs.at[(ptr)]
 
@@ -91,4 +128,9 @@ void expr_print(struct expr expr) {
             assert(0 && "???");
             break;
     }
+}
+
+void expr_println(struct expr expr) {
+    expr_print(expr);
+    putchar('\n');
 }

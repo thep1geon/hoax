@@ -74,11 +74,10 @@ minimum before we start tackling actual Hoax source code. We are *not* trying
 to make the next JVM by any means, but we still want our VM to be useful.
 
 - [ ] Hoax Virtual Machine
-    - [ ] Interpret hand-made VM chunks of code
+    - [x] Interpret hand-made VM chunks of code
     - [ ] Call C functions from the HVM
-- [ ] Start compiling Hoax to HVM byte code
-    - [ ] Lexing
-    - [ ] Parsing
+- [x] Start compiling Hoax to HVM byte code
+    - [x] Parsing
     - [ ] Other semantic analysis
 
 ## Features I want in Hoax

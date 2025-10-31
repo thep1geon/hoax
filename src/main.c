@@ -10,36 +10,68 @@
 #include "vm.h"
 #include "compiler.h"
 
-i32 main(i32 argc, char** argv) {
-    UNUSED(argc);
-    UNUSED(argv);
+#define INPUT_BUFFER_CAP 128
+
+void repl() {
+    struct vm vm;
+    struct module module;
+    struct expr_reader reader;
+    struct slice(char) input;
+    struct expr expr;
+    u32 ptr;
+    char input_buffer[INPUT_BUFFER_CAP];
 
     expr_new_nil();
 
-    struct vm vm = vm_create();
-    struct module module = {0};
+    vm = vm_create();
+    module = (struct module){0};
 
-    struct slice(char) src = STRING("(display)\n(display (display))\n(display (+ (+ 3 2) 7))\n(display 42)");
-    struct expr_reader reader = reader_create(src);
-    u32 ptr = 0;
+    printf("(hoax)>> ");
+    while (fgets(input_buffer, INPUT_BUFFER_CAP, stdin)) {
+        input = STRING(input_buffer);
+        if (input.length <= 1) {
+            printf("(hoax)>> ");
+            continue;
+        }
 
-    printf("-=-=-=-=-=-=-Source=-=-=-=-=-=-=\n%.*s\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n", (i32)reader.src.length, src.ptr);
+        reader = reader_create(input);
+        ptr = read_expr(&reader);
 
-    while ((ptr = read_expr(&reader)) != 0) {
         module.code.length = 0;
         module.constants.length = 0;
 
-        compile(&module, EXPR(ptr));
+        if (compile(&module, EXPR(ptr))) {
+            printf("(hoax)>> ");
+            continue;
+        }
 
         vm_load_module(&vm, &module);
-        vm_run(&vm);
+
+        expr = vm_run(&vm);
+
+        if (!nilp(expr)) expr_println(expr);
+
+        printf("(hoax)>> ");
     }
 
-    vm_destroy(&vm);
+    putchar('\n');
+
     module_destroy(&module);
 
+    vm_destroy(&vm);
 
     DYNARRAY_FREE(&exprs);
+}
+
+i32 main(i32 argc, char** argv) {
+    
+    /* Fire up the repl */
+    if (argc == 1) {
+        repl();
+        return 0;
+    }
+
+    file(argc-1, argv+1);
 
     return 0;
 }

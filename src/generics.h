@@ -401,6 +401,6 @@
  * Useful little string function for turning string literals into slices of 
  * characters
  * */
-#define STRING(strlit) {.ptr = (strlit), .length = strlen((strlit))}
+#define STRING(strlit) (struct slice(char)){.ptr = (strlit), .length = strlen((strlit))}
 
 #endif  /*__GENERICS_H*/

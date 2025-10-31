@@ -80,6 +80,11 @@ static inline u8 bound(struct expr_reader* reader) {
     return reader->cursor < reader->src.length;
 }
 
+/* 
+ * TODO: Add more error handling and actually handle the case of invalid
+ * characters
+ * */
+
 u32 read_expr(struct expr_reader* reader) {
     struct file_location loc;
     u32 ptr;

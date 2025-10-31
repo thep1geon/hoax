@@ -24,7 +24,7 @@ $(TARGET): $(OBJ_FILES)
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
 run: $(TARGET)
-	$(TARGET) ./app.hx
+	$(TARGET)
 
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET_DIR)

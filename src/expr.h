@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* TODO: Implement strings */
+/* ~TODO: Implement strings */
 
 enum expr_type {
     E_NIL,
@@ -68,5 +68,7 @@ u8 consp(struct expr expr);
 
 void expr_print(struct expr expr);
 void expr_println(struct expr expr);
+
+u8 expr_cons_length(struct expr expr);
 
 #endif  /*__EXPR_H*/

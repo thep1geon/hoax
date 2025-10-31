@@ -57,10 +57,56 @@ void repl() {
     putchar('\n');
 
     module_destroy(&module);
-
     vm_destroy(&vm);
-
     DYNARRAY_FREE(&exprs);
+}
+
+void file(char* filename) {
+    struct vm vm;
+    struct module module;
+    struct slice(char) src;
+    struct expr_reader reader;
+    char* file_contents;
+    FILE* fp;
+    usize file_size;
+    u32 ptr;
+
+    fp = fopen(filename, "r");
+    if (!fp) {
+        fprintf(stderr, "[file] error: failed to open file %s\n", filename);
+    }
+
+    fseek(fp, 0, SEEK_END);
+    file_size = ftell(fp);
+    rewind(fp);
+
+    file_contents = malloc(file_size);
+    assert(file_contents && "OOM or something");
+    
+    assert(file_size == fread(file_contents, 1, file_size, fp));
+
+    src = (struct slice(char)){.ptr = file_contents, .length = file_size};
+
+    expr_new_nil();
+
+    vm = vm_create();
+    module = (struct module){0};
+
+    reader = reader_create(src);
+    while ((ptr = read_expr(&reader)) != 0) {
+        compile_expr(&module, EXPR(ptr));
+    }
+
+    compile(&module, EXPR(0));
+
+    vm_load_module(&vm, &module);
+
+    vm_run(&vm);
+
+    module_destroy(&module);
+    vm_destroy(&vm);
+    DYNARRAY_FREE(&exprs);
+    free(file_contents);
 }
 
 i32 main(i32 argc, char** argv) {
@@ -71,7 +117,7 @@ i32 main(i32 argc, char** argv) {
         return 0;
     }
 
-    file(argc-1, argv+1);
+    file(argv[1]);
 
     return 0;
 }

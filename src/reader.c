@@ -67,8 +67,12 @@ static inline bool is_symbol(char c) {
     return is_digit(c) || is_alpha(c) || is_special_char(c);
 }
 
+static inline u8 bound(struct expr_reader* reader) {
+    return reader->cursor < reader->src.length;
+}
+
 static inline void skip_space(struct expr_reader* reader) {
-    while (is_space(reader->src.ptr[reader->cursor]) && reader->cursor <= reader->src.length)
+    while (bound(reader) && is_space(reader->src.ptr[reader->cursor]))
         advance(reader);
 }
 
@@ -76,12 +80,8 @@ static inline char char_at(struct expr_reader* reader) {
     return reader->src.ptr[reader->cursor];
 }
 
-static inline u8 bound(struct expr_reader* reader) {
-    return reader->cursor < reader->src.length;
-}
-
 /* 
- * TODO: Add more error handling and actually handle the case of invalid
+ * ~TODO: Add more error handling and actually handle the case of invalid
  * characters
  * */
 
@@ -100,6 +100,7 @@ u32 read_expr(struct expr_reader* reader) {
         advance(reader);
         ptr = read_cons(reader);
         EXPR(ptr).loc = loc;
+        EXPR(ptr).length = expr_cons_length(EXPR(ptr));
         return ptr;
     }
 
@@ -160,7 +161,7 @@ u32 read_cons(struct expr_reader* reader) {
         fprintf(stderr, "%d:%d: error: expected ')' found EOF instead\n",
                 reader->current_location.line,
                 reader->current_location.column);
-        /* TODO: Find a better way to catch the error */
+        /* ~TODO: Find a better way to catch the error */
         exit(1);
     }
 

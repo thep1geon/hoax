@@ -134,3 +134,13 @@ void expr_println(struct expr expr) {
     expr_print(expr);
     putchar('\n');
 }
+
+static u8 __expr_cons_length(struct expr expr, u8 acc) {
+    if (!consp(CDR(expr))) return acc;
+
+    return __expr_cons_length(CDR(expr), acc+1);
+}
+
+u8 expr_cons_length(struct expr expr) {
+    return __expr_cons_length(expr, 1);
+}

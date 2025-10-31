@@ -13,7 +13,7 @@ SLICE_DECL(char); /* basically a string */
 
 
 /* 
- * TODO: see about encoding a file location in a 32 bit integer with the
+ * ~TODO: see about encoding a file location in a 32 bit integer with the
  * first 8 bits being the column and the last 24 being the line.
  *
  * Realistically, your source code should not be exceeding 256 columns, that's

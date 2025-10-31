@@ -116,7 +116,7 @@
 /* Dynamic Arrays */
 
 /* 
- * TODO: Maybe rename the push function to append. Or just have both, even though
+ * ~TODO: Maybe rename the push function to append. Or just have both, even though
  * they do the same exact thing.
  * */
 #define dynarray(T) dynarray__##T

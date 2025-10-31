@@ -1,1 +1,5 @@
 (display 3)
+
+(display (+ 1 2))
+
+(display (+ 1 (+ 1)))

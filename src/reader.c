@@ -157,6 +157,10 @@ u32 read_cons(struct expr_reader* reader) {
 
     skip_space(reader);
     
+    /* 
+     * ~TODO: Somehow figure out where the missing closing paren is supossed to
+     *       go.
+     * */
     if (!bound(reader)) {
         fprintf(stderr, "%d:%d: error: expected ')' found EOF instead\n",
                 reader->current_location.line,

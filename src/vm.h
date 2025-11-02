@@ -8,17 +8,12 @@
 #include "module.h"
 
 struct vm {
-    struct expr* stack;
+    struct expr stack[STACK_MAX];
     struct module* module;
+    u8* ip;
     u32 sp;
-    u32 ip;
+    u8 running;
 };
-
-struct vm vm_create();
-
-void vm_destroy(struct vm* vm);
-
-void vm_load_module(struct vm* vm, struct module* module);
 
 u8 vm_fetch_u8(struct vm* vm);
 
@@ -28,6 +23,6 @@ struct expr vm_pop(struct vm* vm);
 
 struct expr vm_get_const(struct vm* vm, u8 const_index);
 
-struct expr vm_run(struct vm* vm);
+struct expr vm_run(struct vm* vm, struct module* module);
 
 #endif  /* __VM_H */

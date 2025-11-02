@@ -30,8 +30,20 @@ void module_disassemble(struct module* module) {
             case OP_RETURN:
                 puts("OP_RETURN");
                 break;
+            case OP_HALT:
+                puts("OP_HALT");
+                break;
             case OP_ADD:
                 puts("OP_ADD");
+                break;
+            case OP_SUB:
+                puts("OP_SUB");
+                break;
+            case OP_MUL:
+                puts("OP_MUL");
+                break;
+            case OP_DIV:
+                puts("OP_DIV");
                 break;
             case OP_DISPLAY:
                 puts("OP_DISPLAY");

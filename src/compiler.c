@@ -33,21 +33,9 @@ u8 compile_expr(struct module* module, struct expr expr) {
 }
 
 u8 compile_list(struct module* module, struct expr expr) {
-    u8 ret;
+    assert(symbolp(CAR(expr)) && "The first element of a list must be a symbol");
 
-    ret = 0;
-
-    if (symbolp(CAR(expr))) {
-        ret = compile_function(module, expr);
-        return ret;
-    } else {
-        ret = compile_expr(module, CAR(expr));
-        if (ret) return ret;
-        ret = compile_expr(module, CDR(expr));
-        if (ret) return ret;
-    }
-
-    return 0;
+    return compile_function(module, expr);
 }
 
 u8 compile_function(struct module* module, struct expr expr) {
@@ -62,9 +50,18 @@ u8 compile_function(struct module* module, struct expr expr) {
 
     compile_args(module, CDR(expr));
 
+    /* ~TODO: we need a better way to check against builtin functions */
     if (memcmp(car.symbol, "+", 1) == 0) {
         module_write_byte(module, OP_ADD);
-    } else if (memcmp(car.symbol, "display", 7) == 0){
+    } else if (memcmp(car.symbol, "-", 1) == 0) {
+        module_write_byte(module, OP_SUB);
+    } else if (memcmp(car.symbol, "*", 1) == 0) {
+        module_write_byte(module, OP_MUL);
+    } else if (memcmp(car.symbol, "/", 1) == 0) {
+        module_write_byte(module, OP_DIV);
+    } else if (memcmp(car.symbol, "quit", 4) == 0) {
+        module_write_byte(module, OP_HALT);
+    } else if (memcmp(car.symbol, "display", 7) == 0) {
         module_write_byte(module, OP_DISPLAY);
     }else {
         fprintf(stderr, "(%d:%d) error: unknown builtin function: %.*s\n", 

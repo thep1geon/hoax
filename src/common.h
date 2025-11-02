@@ -10,6 +10,7 @@
 SLICE_DECL(char); /* basically a string */
 
 #define UNUSED(v) (void)v
+#define UNIMPLEMENTED() assert(0 && "Unimplemented");
 
 
 /* 

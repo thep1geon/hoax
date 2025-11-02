@@ -8,9 +8,15 @@ DYNARRAY_DECL(u8);
 
 enum op_code {
     OP_ADD,
-    OP_DISPLAY,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
+
     OP_CONSTANT,
     OP_RETURN,
+    OP_HALT,
+
+    OP_DISPLAY,
 };
 
 struct module {

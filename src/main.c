@@ -23,11 +23,12 @@ void repl() {
 
     expr_new_nil();
 
-    vm = vm_create();
+    vm = (struct vm){0};
+    vm.running = true;
     module = (struct module){0};
 
     printf("(hoax)>> ");
-    while (fgets(input_buffer, INPUT_BUFFER_CAP, stdin)) {
+    while (vm.running && fgets(input_buffer, INPUT_BUFFER_CAP, stdin)) {
         input = STRING(input_buffer);
         if (input.length <= 1) {
             printf("(hoax)>> ");
@@ -35,29 +36,31 @@ void repl() {
         }
 
         reader = reader_create(input);
-        ptr = read_expr(&reader);
 
-        module.code.length = 0;
-        module.constants.length = 0;
+        DYNARRAY_CLEAR(&module.code);
+        DYNARRAY_CLEAR(&module.constants);
 
-        if (compile(&module, EXPR(ptr))) {
-            printf("(hoax)>> ");
-            continue;
+        while ((ptr = read_expr(&reader)) != 0) {
+            if (compile_expr(&module, EXPR(ptr))) {
+                continue;
+            }
         }
 
-        vm_load_module(&vm, &module);
+        compile(&module, EXPR(0));
 
-        expr = vm_run(&vm);
+        expr = vm_run(&vm, &module);
 
         if (!nilp(expr)) expr_println(expr);
 
-        printf("(hoax)>> ");
+        if (vm.running)
+            printf("(hoax)>> ");
+
     }
 
-    putchar('\n');
+    if (vm.running)
+        putchar('\n');
 
     module_destroy(&module);
-    vm_destroy(&vm);
     DYNARRAY_FREE(&exprs);
 }
 
@@ -89,7 +92,8 @@ void file(char* filename) {
 
     expr_new_nil();
 
-    vm = vm_create();
+    vm = (struct vm){0};
+    vm.running = true;
     module = (struct module){0};
 
     reader = reader_create(src);
@@ -99,12 +103,9 @@ void file(char* filename) {
 
     compile(&module, EXPR(0));
 
-    vm_load_module(&vm, &module);
-
-    vm_run(&vm);
+    vm_run(&vm, &module);
 
     module_destroy(&module);
-    vm_destroy(&vm);
     DYNARRAY_FREE(&exprs);
     free(file_contents);
 }

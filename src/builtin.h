@@ -14,6 +14,8 @@ struct builtin_symbol {
  *        - Pushes the value true onto the stack
  *      f => OP_FALSE
  *        - Pushes the value false onto the stack
+ *      nil => OP_NIL
+ *        - Pushes the value nil onto the stack
  * Maths:
  *      + => OP_ADD
  *        - Takes two elements off the stack and adds them together if they are 

@@ -59,6 +59,12 @@ u8 compile_function(struct module* module, struct expr expr) {
         module_write_byte(module, OP_MUL);
     } else if (memcmp(car.symbol, "/", 1) == 0) {
         module_write_byte(module, OP_DIV);
+    } else if (memcmp(car.symbol, "car", 3) == 0) {
+        module_write_byte(module, OP_CAR);
+    } else if (memcmp(car.symbol, "cdr", 3) == 0) {
+        module_write_byte(module, OP_CDR);
+    } else if (memcmp(car.symbol, "cons", 4) == 0) {
+        module_write_byte(module, OP_CONS);
     } else if (memcmp(car.symbol, "quit", 4) == 0) {
         module_write_byte(module, OP_HALT);
     } else if (memcmp(car.symbol, "display", 7) == 0) {

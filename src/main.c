@@ -77,6 +77,7 @@ void file(char* filename) {
     fp = fopen(filename, "r");
     if (!fp) {
         fprintf(stderr, "[file] error: failed to open file %s\n", filename);
+        exit(1);
     }
 
     fseek(fp, 0, SEEK_END);

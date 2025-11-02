@@ -48,6 +48,15 @@ void module_disassemble(struct module* module) {
             case OP_DISPLAY:
                 puts("OP_DISPLAY");
                 break;
+            case OP_CONS:
+                puts("OP_CONS");
+                break;
+            case OP_CAR:
+                puts("OP_CAR");
+                break;
+            case OP_CDR:
+                puts("OP_CDR");
+                break;
             case OP_CONSTANT:
                 offset += 1;
                 const_index = module->code.at[offset];

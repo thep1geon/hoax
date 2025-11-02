@@ -27,6 +27,7 @@ struct expr vm_get_const(struct vm* vm, u8 const_index) {
 
 struct expr vm_run(struct vm* vm, struct module* module) {
     struct expr expr, a, b;
+    u32 a_ptr, b_ptr;
     u8 inst;
 
     vm->module = module; 
@@ -62,6 +63,21 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 break;
             case OP_DIV:
                 UNIMPLEMENTED();
+            case OP_CONS:
+                a_ptr = expr_box(vm_pop(vm));
+                b_ptr = expr_box(vm_pop(vm));
+                vm_push(vm, expr_create_cons(b_ptr, a_ptr));
+                break;
+            case OP_CAR:
+                expr = vm_peek(vm);
+                assert(consp(expr));
+                vm_push(vm, CAR(vm_peek(vm)));
+                break;
+            case OP_CDR:
+                expr = vm_peek(vm);
+                assert(consp(expr));
+                vm_push(vm, CDR(vm_peek(vm)));
+                break;
             case OP_DISPLAY:
                 expr = vm_pop(vm);
                 expr_println(expr);

@@ -12,6 +12,10 @@ enum op_code {
     OP_MUL,
     OP_DIV,
 
+    OP_CONS,
+    OP_CAR,
+    OP_CDR,
+
     OP_CONSTANT,
     OP_RETURN,
     OP_HALT,

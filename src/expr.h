@@ -43,6 +43,8 @@ DYNARRAY_DECL_S(expr);
 
 extern struct dynarray(expr) exprs;
 
+u32 expr_box(struct expr expr);
+
 u32 expr_new();
 u32 expr_new_nil();
 u32 expr_new_integer(i64 integer);

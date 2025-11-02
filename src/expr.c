@@ -6,9 +6,7 @@ DYNARRAY_IMPL_S(expr);
 
 struct dynarray(expr) exprs = {0};
 
-u32 expr_new() {
-    struct expr expr = {0};
-
+u32 expr_box(struct expr expr) {
     /* The dynarray is too full for our needs */
     /* We have to be careful of overflowing our u32 */
     if (exprs.length >= (usize)(1 << 31)) {
@@ -19,6 +17,11 @@ u32 expr_new() {
     dynarray__expr_push(&exprs, expr);
 
     return exprs.length - 1;
+}
+
+u32 expr_new() {
+    struct expr expr = {0};
+    return expr_box(expr);
 }
 
 u32 expr_new_nil() {

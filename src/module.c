@@ -45,6 +45,15 @@ void module_disassemble(struct module* module) {
             case OP_DIV:
                 puts("OP_DIV");
                 break;
+            case OP_TRUE:
+                puts("OP_TRUE");
+                break;
+            case OP_FALSE:
+                puts("OP_FALSE");
+                break;
+            case OP_NIL:
+                puts("OP_NIL");
+                break;
             case OP_DISPLAY:
                 puts("OP_DISPLAY");
                 break;

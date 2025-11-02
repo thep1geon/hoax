@@ -15,6 +15,10 @@ enum op_code {
     OP_CONS,
     OP_CAR,
     OP_CDR,
+    
+    OP_TRUE,
+    OP_FALSE,
+    OP_NIL,
 
     OP_CONSTANT,
     OP_RETURN,

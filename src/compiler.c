@@ -20,13 +20,27 @@ u8 compile_expr(struct module* module, struct expr expr) {
         case E_CONS:
             return compile_list(module, expr);
         case E_SYMBOL:
-            fprintf(stderr, "Compilation of symbols is not implemented yet\n");
+            return compile_symbol(module, expr);
             return 1;
         case E_NIL:
+        case E_BOOL:
             break;
-        case E_TYPE_COUNT:
-        default:
-            assert(0 && "How did we get here?");
+    }
+
+    return 0;
+}
+
+u8 compile_symbol(struct module* module, struct expr expr) {
+    if (memcmp(expr.symbol, "t", 1) == 0) {
+        module_write_byte(module, OP_TRUE);
+    } else if (memcmp(expr.symbol, "f", 1) == 0) {
+        module_write_byte(module, OP_FALSE);
+    } else if (memcmp(expr.symbol, "nil", 3) == 0) {
+        module_write_byte(module, OP_NIL);
+    } else {
+        fprintf(stderr, "(%d:%d) error: unknown builtin symbol: %.*s\n", 
+                expr.loc.line, expr.loc.column, expr.length, expr.symbol);
+        return 2;
     }
 
     return 0;

@@ -9,3 +9,13 @@
 (display (car (cons (* 3 2) (+ (+ 1 2 ) (* 2 2)))))
 
 (display (cdr (cons 6 7)))
+
+(display (cons 1 (cons 2 (cons 3 nil))))
+
+(display (car (cons 1 (cons 2 (cons 3 nil)))))
+
+(display (cdr (cons 1 (cons 2 (cons 3 nil)))))
+
+(display (car (cdr (cons 1 (cons 2 (cons 3 nil))))))
+
+(display (cdr (cdr (cons 1 (cons 2 (cons 3 nil))))))

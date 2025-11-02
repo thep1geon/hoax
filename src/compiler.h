@@ -16,6 +16,7 @@
 
 u8 compile(struct module* module, struct expr expr);
 u8 compile_expr(struct module* module, struct expr expr);
+u8 compile_symbol(struct module* module, struct expr expr);
 u8 compile_list(struct module* module, struct expr expr);
 u8 compile_function(struct module* module, struct expr expr);
 u8 compile_args(struct module* module, struct expr expr);

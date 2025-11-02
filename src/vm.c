@@ -63,6 +63,15 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 break;
             case OP_DIV:
                 UNIMPLEMENTED();
+            case OP_TRUE:
+                vm_push(vm, expr_create_boolean(true));
+                break;
+            case OP_FALSE:
+                vm_push(vm, expr_create_boolean(false));
+                break;
+            case OP_NIL:
+                vm_push(vm, expr_create_nil());
+                break;
             case OP_CONS:
                 a_ptr = expr_box(vm_pop(vm));
                 b_ptr = expr_box(vm_pop(vm));

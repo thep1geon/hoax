@@ -7,15 +7,16 @@
 
 enum expr_type {
     E_NIL,
+    E_BOOLEAN,
     E_INTEGER,
     E_CONS,
     E_SYMBOL,
-    E_TYPE_COUNT,
 };
 
 struct expr {
     /* the goal is to keep this union to the max of 8 bytes */
     union {
+        bool boolean;
         i64 integer;
         /* 
          * Pointer into the source string. This way we don't have to worry about
@@ -47,12 +48,14 @@ u32 expr_box(struct expr expr);
 
 u32 expr_new();
 u32 expr_new_nil();
+u32 expr_new_boolean(bool boolean);
 u32 expr_new_integer(i64 integer);
 u32 expr_new_symbol(char* symbol, u8 length);
 u32 expr_new_cons(u32 car, u32 cdr);
 
 struct expr expr_create();
 struct expr expr_create_nil();
+struct expr expr_create_boolean(bool boolean);
 struct expr expr_create_integer(i64 integer);
 struct expr expr_create_symbol(char* symbol, u8 length);
 struct expr expr_create_cons(u32 car, u32 cdr);
@@ -64,6 +67,7 @@ struct expr expr_create_cons(u32 car, u32 cdr);
 #define CDR(e) EXPR((e).cdr)
 
 u8 nilp(struct expr expr);
+u8 booleanp(struct expr expr);
 u8 integerp(struct expr expr);
 u8 symbolp(struct expr expr);
 u8 consp(struct expr expr);

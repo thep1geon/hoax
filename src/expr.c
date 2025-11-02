@@ -32,6 +32,15 @@ u32 expr_new_nil() {
     return ptr;
 }
 
+u32 expr_new_boolean(bool boolean) {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_BOOLEAN;
+    exprs.at[ptr].boolean = boolean;
+
+    return ptr;
+}
+
 u32 expr_new_integer(i64 integer) {
     u32 ptr = expr_new();
 
@@ -72,6 +81,15 @@ struct expr expr_create_nil() {
     return expr;
 }
 
+struct expr expr_create_boolean(bool boolean) {
+    struct expr expr = expr_create();
+
+    expr.type = E_BOOLEAN;
+    expr.boolean = boolean;
+
+    return expr;
+}
+
 struct expr expr_create_integer(i64 integer) {
     struct expr expr = expr_create();
     expr.type = E_INTEGER;
@@ -105,6 +123,7 @@ struct expr expr_create_cons(u32 car, u32 cdr) {
 #define CDR(e) EXPR((e).cdr)
 
 u8 nilp(struct expr expr) { return expr.type == E_NIL; }
+u8 boolp(struct expr expr) { return expr.type == E_BOOLEAN; }
 u8 integerp(struct expr expr) { return expr.type == E_INTEGER; }
 u8 symbolp(struct expr expr) { return expr.type == E_SYMBOL; }
 u8 consp(struct expr expr) { return expr.type == E_CONS; }
@@ -127,8 +146,8 @@ void expr_print(struct expr expr) {
             expr_print(CDR(expr));
             printf(")");
             break;
-        case E_TYPE_COUNT:
-            assert(0 && "???");
+        case E_BOOLEAN:
+            printf(expr.boolean ? "T" : "F");
             break;
     }
 }

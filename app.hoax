@@ -19,3 +19,7 @@
 (display (car (cdr (cons 1 (cons 2 (cons 3 nil))))))
 
 (display (cdr (cdr (cons 1 (cons 2 (cons 3 nil))))))
+
+(display t)
+
+(display f)

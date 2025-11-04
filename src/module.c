@@ -25,7 +25,9 @@ void module_disassemble(struct module* module) {
     u8 const_index;
     u32 offset = 0;
 
+    fprintf(stderr, "Module Bytecode:\n");
     while (offset < module->code.length) {
+        printf("%04X\t", offset);
         switch ((enum op_code)module->code.at[offset]) {
             case OP_RETURN:
                 puts("OP_RETURN");
@@ -65,6 +67,9 @@ void module_disassemble(struct module* module) {
                 break;
             case OP_CDR:
                 puts("OP_CDR");
+                break;
+            case OP_TOGGLE_DEBUG:
+                puts("OP_TOGGLE_DEBUG");
                 break;
             case OP_CONSTANT:
                 offset += 1;

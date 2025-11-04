@@ -22,6 +22,7 @@ enum op_code {
 
     OP_CONSTANT,
     OP_RETURN,
+    OP_TOGGLE_DEBUG,
     OP_HALT,
 
     OP_DISPLAY,

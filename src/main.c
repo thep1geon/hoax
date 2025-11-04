@@ -15,10 +15,9 @@
 void repl() {
     struct vm vm;
     struct module module;
-    struct expr_reader reader;
     struct slice(char) input;
     struct expr expr;
-    u32 ptr;
+    struct compiler compiler;
     char input_buffer[INPUT_BUFFER_CAP];
 
     expr_new_nil();
@@ -26,6 +25,8 @@ void repl() {
     vm = (struct vm){0};
     vm.running = true;
     module = (struct module){0};
+
+    compiler = (struct compiler){0};
 
     printf("(hoax)>> ");
     while (vm.running && fgets(input_buffer, INPUT_BUFFER_CAP, stdin)) {
@@ -35,20 +36,17 @@ void repl() {
             continue;
         }
 
-        reader = reader_create(input);
-
         DYNARRAY_CLEAR(&module.code);
         DYNARRAY_CLEAR(&module.constants);
 
-        while ((ptr = read_expr(&reader)) != 0) {
-            if (compile_expr(&module, EXPR(ptr))) {
-                continue;
-            }
-        }
+        compiler_init(&compiler, input, &module);
 
-        compile(&module, EXPR(0));
+        compile(&compiler);
 
-        expr = vm_run(&vm, &module);
+        if (vm.debug)
+            module_disassemble(compiler.module);
+
+        expr = vm_run(&vm, compiler.module);
 
         if (!nilp(expr)) expr_println(expr);
 
@@ -60,7 +58,8 @@ void repl() {
     if (vm.running)
         putchar('\n');
 
-    module_destroy(&module);
+    if (compiler.module)
+        module_destroy(compiler.module);
     DYNARRAY_FREE(&exprs);
 }
 
@@ -68,11 +67,10 @@ void file(char* filename) {
     struct vm vm;
     struct module module;
     struct slice(char) src;
-    struct expr_reader reader;
+    struct compiler compiler;
     char* file_contents;
     FILE* fp;
     usize file_size;
-    u32 ptr;
 
     fp = fopen(filename, "r");
     if (!fp) {
@@ -97,21 +95,25 @@ void file(char* filename) {
     vm.running = true;
     module = (struct module){0};
 
-    reader = reader_create(src);
-    while ((ptr = read_expr(&reader)) != 0) {
-        compile_expr(&module, EXPR(ptr));
+    compiler = (struct compiler){0};
+
+    compiler_init(&compiler, src, &module);
+
+    if (!compile(&compiler)) {
+        if (vm.debug) {
+            module_disassemble(compiler.module);
+        }
+
+        vm_run(&vm, compiler.module);
     }
 
-    compile(&module, EXPR(0));
-
-    vm_run(&vm, &module);
-
-    module_destroy(&module);
+    module_destroy(compiler.module);
     DYNARRAY_FREE(&exprs);
     free(file_contents);
 }
 
 i32 main(i32 argc, char** argv) {
+    UNUSED(argv);
     
     /* Fire up the repl */
     if (argc == 1) {

@@ -12,7 +12,8 @@ struct vm {
     struct module* module;
     u8* ip;
     u32 sp;
-    u8 running;
+    u8 running : 4;
+    u8 debug : 4;
 };
 
 u8 vm_fetch_u8(struct vm* vm);

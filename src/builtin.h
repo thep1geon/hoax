@@ -6,6 +6,12 @@ struct builtin_symbol {
     u8 length; /* They must also adhere to the 256 character limit */
 };
 
+struct builtin_function {
+    struct builtin_symbol symbol;
+    u8 artity;
+    u16 padding;
+};
+
 /*
  * The builtin functions/symbols 
  *

@@ -156,7 +156,12 @@ u32 read_cons(struct expr_reader* reader) {
     u32 car;
 
     skip_space(reader);
-    
+
+    if (char_at(reader) == ')') {
+        advance(reader);
+        return 0;
+    }
+
     /* 
      * ~TODO: Somehow figure out where the missing closing paren is supossed to
      *       go.
@@ -167,11 +172,6 @@ u32 read_cons(struct expr_reader* reader) {
                 reader->current_location.column);
         /* ~TODO: Find a better way to catch the error */
         exit(1);
-    }
-
-    if (char_at(reader) == ')') {
-        advance(reader);
-        return 0;
     }
 
     car = read_expr(reader);

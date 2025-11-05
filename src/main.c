@@ -41,14 +41,14 @@ void repl() {
 
         compiler_init(&compiler, input, &module);
 
-        compile(&compiler);
+        if (compile(&compiler) == COMPILE_OK) {
+            if (vm.debug)
+                module_disassemble(compiler.module);
 
-        if (vm.debug)
-            module_disassemble(compiler.module);
+            expr = vm_run(&vm, compiler.module);
 
-        expr = vm_run(&vm, compiler.module);
-
-        if (!nilp(expr)) expr_println(expr);
+            if (!nilp(expr)) expr_println(expr);
+        }
 
         if (vm.running)
             printf("(hoax)>> ");
@@ -99,13 +99,8 @@ void file(char* filename) {
 
     compiler_init(&compiler, src, &module);
 
-    if (!compile(&compiler)) {
-        if (vm.debug) {
-            module_disassemble(compiler.module);
-        }
-
+    if (compile(&compiler) == COMPILE_OK)
         vm_run(&vm, compiler.module);
-    }
 
     module_destroy(compiler.module);
     DYNARRAY_FREE(&exprs);

@@ -5,6 +5,12 @@
 #include "expr.h"
 #include "reader.h"
 
+enum compiler_status {
+    COMPILE_OK,
+    COMPILE_UNKOWN_FUNCTION,
+    COMPILE_UNKOWN_SYMBOL,
+};
+
 struct compiler {
     struct expr_reader reader;
     struct module* module;

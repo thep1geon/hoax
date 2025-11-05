@@ -69,13 +69,13 @@ purchasing a copy of the book.
 
 A little road map to keep me on track. This will me modified as I go along of course.
 
-The idea here is to get the Hoax Virtual Machine (HVM) up and running the bare
+The idea here is to get the Hoax Virtual Machine (HXVM) up and running the bare
 minimum before we start tackling actual Hoax source code. We are *not* trying
 to make the next JVM by any means, but we still want our VM to be useful.
 
 - [ ] Hoax Virtual Machine
     - [x] Interpret hand-made VM chunks of code
-    - [ ] Call C functions from the HVM
+    - [ ] Call C functions from the HXVM
 - [x] Start compiling Hoax to HVM byte code
     - [x] Parsing
     - [ ] Other semantic analysis
@@ -85,7 +85,45 @@ to make the next JVM by any means, but we still want our VM to be useful.
 A list of features I want in Hoax that were or were not in Ruse.
 
 - C Interop
+    - The idea here is to have an API of sorts to interact with Hoax from C and
+    then be able to dynamically link libraries into an instance of the HXVM and
+    call the functions.
+    - Another idea is to have some sort of C FFI within the Hoax compiler to
+    call out to externally defined functions and symbols when linked against the
+    library.
+        - An example here would be to link against libc, and then write the
+        function signatures for various libc functions in Hoax
 - Macros
 - Type system of sorts
 - Garbage collection
 - User defined data-types
+- A virtual machine interpreter instead of a tree-walker interpreter
+
+## The HXVM (Hoax Virtual Machine)
+
+The HXVM will have an instruction set very particular to the
+semantics of LISP. Various instructions will only make sense in the realm of a 
+LISP, this set includes, but is not limited to:
+
+- OP\_CAR
+    - Pushes the car (head) of the element at the top of the stack if it is of
+    type cons
+- OP\_CDR
+    - Pushes the cdr (tail) of the element at the top of the stack if it is of
+    type cons
+- OP\_CONS
+    - Pops the first two elements on the stack, boxes them, and places them in
+    a cons cell on the top of the stack
+
+But the HXVM will also feature more generalized instructions for working with
+all types of data, such as math operations, control flow instructions, etc.
+
+## Hoax as a language
+
+Hoax as a language is meant to be an interpreted scripting language with a focus
+on extensibility. There will be many options in the future to interop with C at
+different levels depending on your use case. Aside from that, I plan on adding
+a macro system which will run at compile time, along with a module/namespace
+system which will also be computed at compile time. It might seem like not a lot
+now, but this is all the foundational code being written to set up for a good
+time moving forward.

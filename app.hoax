@@ -1,25 +1,38 @@
+;; Print 3
 (display 3)
 
+;; Print the sum of 1 and 2
 (display (+ 1 2))
 
+;; Print the sum of 1 and the sum of 1 and 1
 (display (+ 1 (+ 1 1)))
 
+;; Print the cons cell containing 3 and 3
 (display (cons (+ 1 2) (+ (+ 1 1) 1)))
 
+;; Print the car of the cons cell containing 6 and 7
 (display (car (cons (* 3 2) (+ (+ 1 2 ) (* 2 2)))))
 
+;; Print the cdr of the cons cell containing 6 and 7
 (display (cdr (cons 6 7)))
 
+;; Print the list (1 2 3)
 (display (cons 1 (cons 2 (cons 3 nil))))
 
+;; Print the first element of the list (1 2 3)
 (display (car (cons 1 (cons 2 (cons 3 nil)))))
 
+;; Print the rest of the list (1 2 3) after the first element
 (display (cdr (cons 1 (cons 2 (cons 3 nil)))))
 
+;; Print the second element of the list (1 2 3)
 (display (car (cdr (cons 1 (cons 2 (cons 3 nil))))))
 
+;; Print the rest of the list (1 2 3) after the second element
 (display (cdr (cdr (cons 1 (cons 2 (cons 3 nil))))))
 
+;; Print the value T
 (display t)
 
+;; Print the value F
 (display f)

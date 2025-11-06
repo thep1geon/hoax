@@ -17,11 +17,6 @@ struct compiler {
 };
 
 /* 
- * ~TODO: Make some sort of state to keep track of compilation.
- *
- * ~TODO: Create a better interface for compiling expressions into the current
- *       module and then have specified compiler_end and compiler_begin functions.
- *
  * ~TODO: Hide some of thse functions, they don't all need to be public for the
  *       users of the "library" to see.
  * */

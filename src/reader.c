@@ -80,12 +80,26 @@ static inline char char_at(struct expr_reader* reader) {
     return reader->src.ptr[reader->cursor];
 }
 
+static inline char char_peek(struct expr_reader* reader) {
+    if (reader->cursor + 1 >= reader->src.length) return '\0';
+    return reader->src.ptr[reader->cursor + 1];
+}
+
+static inline void skip_comment(struct expr_reader* reader) {
+    while (bound(reader) && char_at(reader) != '\n') {
+        advance(reader);
+    }
+
+    advance(reader);
+}
+
 /* 
  * ~TODO: Add more error handling and actually handle the case of invalid
  * characters
  * */
 
 u32 read_expr(struct expr_reader* reader) {
+read_expr_begin:
     struct file_location loc;
     u32 ptr;
 
@@ -95,6 +109,13 @@ u32 read_expr(struct expr_reader* reader) {
     if (!bound(reader)) return 0;
 
     loc = reader->current_location;
+
+    if (char_at(reader) == ';' && char_peek(reader) == ';') {
+        advance(reader);
+        advance(reader);
+        skip_comment(reader);
+        goto read_expr_begin;
+    }
 
     if (char_at(reader) == '(') {
         advance(reader);
@@ -117,6 +138,13 @@ u32 read_atom(struct expr_reader* reader) {
     if (is_symbol(char_at(reader))) {
         return read_symbol(reader);
     }
+
+    if (char_at(reader) == ')')
+        fprintf(stderr, "(%d:%d) error: unexpected ')'\n", 
+                reader->current_location.line, reader->current_location.column);
+    else
+        fprintf(stderr, "(%d:%d) error: unknown character: '%c'\n", 
+                reader->current_location.line, reader->current_location.column, char_at(reader));
 
     return 0;
 }

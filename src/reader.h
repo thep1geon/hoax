@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-/* ~TODO: Implement comments */
-
 struct expr_reader {
     struct slice(char) src;
     u32 cursor;

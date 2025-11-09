@@ -10,7 +10,7 @@
 #include "vm.h"
 #include "compiler.h"
 
-#define INPUT_BUFFER_CAP 128
+#define INPUT_BUFFER_CAP KILOBYTES(1)
 
 void repl() {
     struct vm vm;
@@ -123,7 +123,9 @@ i32 main(i32 argc, char** argv) {
     struct vm vm = {0};
     vm.running = true;
 
-    module_write_byte(&module, OP_JMP);
+    /* equal to something like (if t 3 9)*/
+    module_write_byte(&module, OP_TRUE);
+    module_write_byte(&module, OP_JMF);
     module_write_byte(&module, 0x00);
     module_write_byte(&module, 0x05);
     module_write_byte(&module, OP_CONSTANT);

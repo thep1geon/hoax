@@ -12,7 +12,6 @@ SLICE_DECL(char); /* basically a string */
 #define UNUSED(v) (void)v
 #define UNIMPLEMENTED() assert(0 && "Unimplemented");
 
-
 /* 
  * ~TODO: see about encoding a file location in a 32 bit integer with the
  * first 8 bits being the column and the last 24 being the line.
@@ -26,5 +25,9 @@ struct file_location {
     u16 line;
     u16 column;
 };
+
+#define KILOBYTES(n) (n * 1024)
+#define MEGAMYTES(n) (KILOBYTES(n) * 1024)
+#define GIGABYTES(n) (MEGAMYTES(n) * 1024)
 
 #endif  /*__COMMON_H*/

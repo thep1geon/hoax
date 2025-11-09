@@ -34,7 +34,11 @@ struct expr {
 
     struct file_location loc; /* only used for exprs that come from parsing */
     u8 type;
-    u8 length; /* only used for strings and symbols */
+
+    union {
+        u8 length; /* used for the length of strings, symbols, and lists */
+        u8 arity; /* used for the number of arguments a function or closure take */
+    };
 
     /* essentially 2 free bytes if we need to store more infomation here */
     u16 padding;
@@ -74,6 +78,8 @@ u8 consp(struct expr expr);
 
 void expr_print(struct expr expr);
 void expr_println(struct expr expr);
+
+bool expr_is_truthy(struct expr expr);
 
 u8 expr_cons_length(struct expr expr);
 

@@ -4,6 +4,8 @@
 #include "compiler.h"
 #include "generics.h"
 
+/* ~TODO: Implement if-else expressions */
+
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module) {
     compiler->reader = reader_create(src);
     compiler->module = module;
@@ -12,6 +14,8 @@ void compiler_init(struct compiler* compiler, struct slice(char) src, struct mod
 u8 compile(struct compiler* compiler) {
     u8 ret;
     u32 ptr;
+
+    ret = COMPILE_OK;
 
     // ptr = read_expr(&compiler->reader);
     while ((ptr = read_expr(&compiler->reader)) != 0) {

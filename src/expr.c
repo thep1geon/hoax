@@ -157,6 +157,23 @@ void expr_println(struct expr expr) {
     putchar('\n');
 }
 
+bool expr_is_truthy(struct expr expr) {
+    switch (expr.type) {
+        case E_NIL:
+            return false;
+        case E_BOOLEAN:
+            return expr.boolean;
+        case E_INTEGER:
+            return expr.integer != 0;
+        case E_CONS:
+            return expr.length != 0;
+        case E_SYMBOL:
+            UNIMPLEMENTED();
+   }
+
+    return false;
+}
+
 static u8 __expr_cons_length(struct expr expr, u8 acc) {
     if (!consp(CDR(expr))) return acc;
 

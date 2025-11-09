@@ -7,27 +7,36 @@
 DYNARRAY_DECL(u8);
 
 enum op_code {
+    /* maths stuff */
     OP_ADD,
     OP_SUB,
     OP_MUL,
     OP_DIV,
 
-    OP_JMP,
+    /* control flow */
+    OP_JMP, /* unconditional jump */
+    OP_JMF, /* jump if the top of the stack is falsy */
 
+    /* cons / heap stuff */
     OP_CONS,
     OP_CAR,
     OP_CDR,
     
+    /* constant values */
     OP_TRUE,
     OP_FALSE,
     OP_NIL,
 
+    /* loading a constant value */
     OP_CONSTANT,
+
+    /* Stopping the vm in some way */
     OP_RETURN,
-    OP_TOGGLE_DEBUG,
     OP_HALT,
 
+    /* virtual machine builtins */
     OP_DISPLAY,
+    OP_TOGGLE_DEBUG,
 };
 
 struct module {

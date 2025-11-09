@@ -35,13 +35,13 @@ struct expr vm_run(struct vm* vm, struct module* module) {
     struct expr expr, a, b;
     u32 a_ptr, b_ptr;
     u8 inst;
+    u16 jump_offset;
 
     vm->module = module; 
     vm->ip = module->code.at;
 
     inst = vm_fetch_u8(vm);
     while (vm->running) {
-        printf("IP: %ld\n", (vm->ip - vm->module->code.at));
         switch ((enum op_code)inst) {
             case OP_CONSTANT:
                 expr = vm_get_const(vm, vm_fetch_u8(vm));
@@ -75,6 +75,13 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 break;
             case OP_JMP:
                 vm->ip += vm_fetch_u16(vm);
+                break;
+            case OP_JMF:
+                jump_offset = vm_fetch_u16(vm);
+                expr = vm_pop(vm);
+                if (!expr_is_truthy(expr)) {
+                    vm->ip += jump_offset;
+                }
                 break;
             case OP_NIL:
                 vm_push(vm, expr_create_nil());

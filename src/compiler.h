@@ -27,6 +27,7 @@ u8 compile(struct compiler* compiler);
 u8 compile_expr(struct compiler* compiler, struct expr expr);
 u8 compile_symbol(struct compiler* compiler, struct expr expr);
 u8 compile_list(struct compiler* compiler, struct expr expr);
+u8 compile_if(struct compiler* compiler, struct expr expr);
 u8 compile_function(struct compiler* compiler, struct expr expr);
 u8 compile_args(struct compiler* compiler, struct expr expr);
 

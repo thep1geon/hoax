@@ -112,34 +112,12 @@ i32 main(i32 argc, char** argv) {
     UNUSED(argv);
 
     /* Fire up the repl */
-    // if (argc == 1) {
-    //     repl();
-    //     return 0;
-    // }
-    //
-    // file(argv[1]);
+    if (argc == 1) {
+        repl();
+        return 0;
+    }
 
-    struct module module = {0};
-    struct vm vm = {0};
-    vm.running = true;
-
-    /* equal to something like (if t 3 9)*/
-    module_write_byte(&module, OP_TRUE);
-    module_write_byte(&module, OP_JMF);
-    module_write_byte(&module, 0x00);
-    module_write_byte(&module, 0x05);
-    module_write_byte(&module, OP_CONSTANT);
-    module_write_byte(&module, module_write_const(&module, expr_create_integer(3)));
-    module_write_byte(&module, OP_JMP);
-    module_write_byte(&module, 0x00);
-    module_write_byte(&module, 0x02);
-    module_write_byte(&module, OP_CONSTANT);
-    module_write_byte(&module, module_write_const(&module, expr_create_integer(9)));
-    module_write_byte(&module, OP_RETURN);
-    module_disassemble(&module);
-    expr_println(vm_run(&vm, &module));
-
-    module_destroy(&module);
+    file(argv[1]);
 
     return 0;
 }

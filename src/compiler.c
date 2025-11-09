@@ -64,9 +64,58 @@ u8 compile_symbol(struct compiler* compiler, struct expr expr) {
 }
 
 u8 compile_list(struct compiler* compiler, struct expr expr) {
+    /* ~TODO: Handle this better */
     assert(symbolp(CAR(expr)) && "The first element of a list must be a symbol");
 
+    if (memcmp(CAR(expr).symbol, "if", 2) == 0)
+        return compile_if(compiler, expr);
+
     return compile_function(compiler, expr);
+}
+
+u8 compile_if(struct compiler* compiler, struct expr expr) {
+    struct expr condition;
+    struct expr then_branch;
+    struct expr else_branch;
+    u32 jmf_save, jmp_save;
+    u16 jmf_offset, jmp_offset;
+    u8 ret;
+
+    /* ~TODO: Handle this better */
+    assert(expr.length == 4 && "if expressions must have 4 parts");
+
+    condition = CAR(CDR(expr));
+    then_branch = CAR(CDR(CDR(expr)));
+    else_branch = CAR(CDR(CDR(CDR(expr))));
+
+    ret = compile_expr(compiler, condition);
+    if (ret != COMPILE_OK) return ret;
+
+    module_write_byte(compiler->module, OP_JMF);
+    module_write_byte(compiler->module, 0x00);
+    module_write_byte(compiler->module, 0x00);
+    jmf_save = compiler->module->code.length;
+
+    ret = compile_expr(compiler, then_branch);
+    if (ret != COMPILE_OK) return ret;
+
+    module_write_byte(compiler->module, OP_JMP);
+    module_write_byte(compiler->module, 0x00);
+    module_write_byte(compiler->module, 0x00);
+    jmp_save = compiler->module->code.length;
+
+    jmf_offset = compiler->module->code.length - jmf_save;
+    compiler->module->code.at[jmf_save-2] = (u8)(((u16)jmf_offset >> 8) & 0xFF);
+    compiler->module->code.at[jmf_save-1] = ((u8) jmf_offset) & 0xFF;
+
+    ret = compile_expr(compiler, else_branch);
+    if (ret != COMPILE_OK) return ret;
+
+    jmp_offset = compiler->module->code.length - jmp_save;
+    compiler->module->code.at[jmp_save-2] = (u8)(((u16)jmp_offset >> 8) & 0xFF);
+    compiler->module->code.at[jmp_save-1] = ((u8) jmp_offset) & 0xFF;
+
+    return COMPILE_OK;
 }
 
 u8 compile_function(struct compiler* compiler, struct expr expr) {

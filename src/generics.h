@@ -115,10 +115,6 @@
 
 /* Dynamic Arrays */
 
-/* 
- * ~TODO: Maybe rename the push function to append. Or just have both, even though
- * they do the same exact thing.
- * */
 #define dynarray(T) dynarray__##T
 
 #define DYNARRAY_DECL_S(T)                                                          \
@@ -375,8 +371,8 @@
         bool is_some;       \
     }
 
-#define OPTION_SOME(d) {.item = (d), .is_some = true}
-#define OPTION_NONE() {.is_some = false}
+#define OPTION_SOME(T, d) (struct option(T)){.item = (d), .is_some = true}
+#define OPTION_NONE(T) (struct option(T)){.is_some = false}
 
 /* Slices */
 
@@ -393,7 +389,6 @@
         struct T* ptr;  \
         usize length;   \
     }
-
 
 #define SLICE_FROM_ARR(arr, start, end) {.ptr = (arr)+(start), .length = (end)-(start)}
 

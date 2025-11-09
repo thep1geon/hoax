@@ -93,11 +93,6 @@ static inline void skip_comment(struct expr_reader* reader) {
     advance(reader);
 }
 
-/* 
- * ~TODO: Add more error handling and actually handle the case of invalid
- * characters
- * */
-
 u32 read_expr(struct expr_reader* reader) {
 read_expr_begin:
     struct file_location loc;
@@ -195,10 +190,10 @@ u32 read_cons(struct expr_reader* reader) {
      *       go.
      * */
     if (!bound(reader)) {
-        fprintf(stderr, "%d:%d: error: expected ')' found EOF instead\n",
+        fprintf(stderr, "(%d:%d): error: expected ')', found EOF instead\n",
                 reader->current_location.line,
                 reader->current_location.column);
-        /* ~TODO: Find a better way to catch the error */
+        /* ~TODO: Find a better way to handle the error */
         exit(1);
     }
 

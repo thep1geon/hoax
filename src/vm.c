@@ -4,7 +4,13 @@
 #include "module.h"
 
 u8 vm_fetch_u8(struct vm* vm) {
-    return *vm->ip;
+    vm->ip += 1;
+    return *(vm->ip - 1);
+}
+
+u16 vm_fetch_u16(struct vm* vm) {
+    vm->ip += 2;
+    return ((u16)(*(vm->ip - 2)) << 8) | *(vm->ip - 1);
 }
 
 struct expr vm_push(struct vm* vm, struct expr expr) {
@@ -35,30 +41,28 @@ struct expr vm_run(struct vm* vm, struct module* module) {
 
     inst = vm_fetch_u8(vm);
     while (vm->running) {
-        vm->ip += 1;
-
+        printf("IP: %ld\n", (vm->ip - vm->module->code.at));
         switch ((enum op_code)inst) {
             case OP_CONSTANT:
                 expr = vm_get_const(vm, vm_fetch_u8(vm));
-                vm->ip += 1;
                 vm_push(vm, expr);
                 break;
             case OP_ADD:
                 a = vm_pop(vm);
                 b = vm_pop(vm);
-                assert(integerp(a) && integerp(b) && "Both operands must be integers");
+                assert(integerp(a) && integerp(b) && "Both operands must be integers for OP_ADD");
                 vm_push(vm, expr_create_integer(a.integer + b.integer));
                 break;
             case OP_SUB:
                 a = vm_pop(vm);
                 b = vm_pop(vm);
-                assert(integerp(a) && integerp(b) && "Both operands must be integers");
+                assert(integerp(a) && integerp(b) && "Both operands must be integers for OP_SUB");
                 vm_push(vm, expr_create_integer(b.integer - a.integer));
                 break;
             case OP_MUL:
                 a = vm_pop(vm);
                 b = vm_pop(vm);
-                assert(integerp(a) && integerp(b) && "Both operands must be integers");
+                assert(integerp(a) && integerp(b) && "Both operands must be integers for OP_MUL");
                 vm_push(vm, expr_create_integer(a.integer * b.integer));
                 break;
             case OP_DIV:
@@ -68,6 +72,9 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 break;
             case OP_FALSE:
                 vm_push(vm, expr_create_boolean(false));
+                break;
+            case OP_JMP:
+                vm->ip += vm_fetch_u16(vm);
                 break;
             case OP_NIL:
                 vm_push(vm, expr_create_nil());

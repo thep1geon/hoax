@@ -108,15 +108,36 @@ void file(char* filename) {
 }
 
 i32 main(i32 argc, char** argv) {
+    UNUSED(argc);
     UNUSED(argv);
-    
-    /* Fire up the repl */
-    if (argc == 1) {
-        repl();
-        return 0;
-    }
 
-    file(argv[1]);
+    /* Fire up the repl */
+    // if (argc == 1) {
+    //     repl();
+    //     return 0;
+    // }
+    //
+    // file(argv[1]);
+
+    struct module module = {0};
+    struct vm vm = {0};
+    vm.running = true;
+
+    module_write_byte(&module, OP_JMP);
+    module_write_byte(&module, 0x00);
+    module_write_byte(&module, 0x05);
+    module_write_byte(&module, OP_CONSTANT);
+    module_write_byte(&module, module_write_const(&module, expr_create_integer(3)));
+    module_write_byte(&module, OP_JMP);
+    module_write_byte(&module, 0x00);
+    module_write_byte(&module, 0x02);
+    module_write_byte(&module, OP_CONSTANT);
+    module_write_byte(&module, module_write_const(&module, expr_create_integer(9)));
+    module_write_byte(&module, OP_RETURN);
+    module_disassemble(&module);
+    expr_println(vm_run(&vm, &module));
+
+    module_destroy(&module);
 
     return 0;
 }

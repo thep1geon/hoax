@@ -17,12 +17,11 @@ struct vm {
 };
 
 u8 vm_fetch_u8(struct vm* vm);
+u16 vm_fetch_u16(struct vm* vm);
+struct expr vm_get_const(struct vm* vm, u8 const_index);
 
 struct expr vm_push(struct vm* vm, struct expr expr);
-
 struct expr vm_pop(struct vm* vm);
-
-struct expr vm_get_const(struct vm* vm, u8 const_index);
 
 struct expr vm_run(struct vm* vm, struct module* module);
 

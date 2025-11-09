@@ -12,6 +12,8 @@ enum op_code {
     OP_MUL,
     OP_DIV,
 
+    OP_JMP,
+
     OP_CONS,
     OP_CAR,
     OP_CDR,

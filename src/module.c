@@ -21,6 +21,10 @@ u8 module_write_const(struct module* module, struct expr expr) {
     return (u8) (module->constants.length - 1);
 }
 
+static inline u16 __module_get_u16(struct module* module, u32 offset) {
+    return ((u16)module->code.at[offset] << 8) | module->code.at[offset + 1];
+}
+
 void module_disassemble(struct module* module) {
     u8 const_index;
     u32 offset = 0;
@@ -46,6 +50,11 @@ void module_disassemble(struct module* module) {
                 break;
             case OP_DIV:
                 puts("OP_DIV");
+                break;
+            case OP_JMP:
+                offset += 1;
+                printf("OP_JMP %d\n", __module_get_u16(module, offset));
+                offset += 1;
                 break;
             case OP_TRUE:
                 puts("OP_TRUE");

@@ -4,8 +4,6 @@
 #include "compiler.h"
 #include "generics.h"
 
-/* ~TODO: Implement if-else expressions */
-
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module) {
     compiler->reader = reader_create(src);
     compiler->module = module;
@@ -64,8 +62,13 @@ u8 compile_symbol(struct compiler* compiler, struct expr expr) {
 }
 
 u8 compile_list(struct compiler* compiler, struct expr expr) {
-    /* ~TODO: Handle this better */
-    assert(symbolp(CAR(expr)) && "The first element of a list must be a symbol");
+    if (!symbolp(CAR(expr))) {
+        fprintf(stderr, "(%d:%d) error: the first element of a list must be a symbol:\n\t'",
+                expr.loc.line, expr.loc.column);
+        expr_print(stderr, expr);
+        fprintf(stderr, "'\n");
+        return COMPILE_EXPECTED_SYMBOL;
+    }
 
     if (memcmp(CAR(expr).symbol, "if", 2) == 0)
         return compile_if(compiler, expr);
@@ -81,8 +84,13 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
     u16 jmf_offset, jmp_offset;
     u8 ret;
 
-    /* ~TODO: Handle this better */
-    assert(expr.length == 4 && "if expressions must have 4 parts");
+    if (expr.length != 4) {
+        fprintf(stderr, "(%d:%d) error: if expressions must have 4 parts:\n\t'",
+                expr.loc.line, expr.loc.column);
+        expr_print(stderr, expr);
+        fprintf(stderr, "'\n");
+        return COMPILE_EXPECTED_ARGS;
+    }
 
     condition = CAR(CDR(expr));
     then_branch = CAR(CDR(CDR(expr)));

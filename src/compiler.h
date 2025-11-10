@@ -9,6 +9,8 @@ enum compiler_status {
     COMPILE_OK,
     COMPILE_UNKOWN_FUNCTION,
     COMPILE_UNKOWN_SYMBOL,
+    COMPILE_EXPECTED_ARGS,
+    COMPILE_EXPECTED_SYMBOL,
 };
 
 struct compiler {

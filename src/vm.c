@@ -103,7 +103,7 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 break;
             case OP_DISPLAY:
                 expr = vm_pop(vm);
-                expr_println(expr);
+                expr_println(stdout, expr);
                 break;
             case OP_TOGGLE_DEBUG:
                 vm->debug = !vm->debug;

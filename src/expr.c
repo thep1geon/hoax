@@ -128,32 +128,32 @@ u8 integerp(struct expr expr) { return expr.type == E_INTEGER; }
 u8 symbolp(struct expr expr) { return expr.type == E_SYMBOL; }
 u8 consp(struct expr expr) { return expr.type == E_CONS; }
 
-void expr_print(struct expr expr) {
+void expr_print(FILE* stream, struct expr expr) {
     switch ((enum expr_type) expr.type) {
         case E_NIL:
-            printf("nil");
+            fprintf(stream, "nil");
             break;
         case E_INTEGER:
-            printf("%ld", expr.integer);
+            fprintf(stream, "%ld", expr.integer);
             break;
         case E_SYMBOL:
-            printf("%.*s", (i32)expr.length, expr.symbol);
+            fprintf(stream, "%.*s", (i32)expr.length, expr.symbol);
             break;
         case E_CONS:
-            printf("(");
-            expr_print(CAR(expr));
-            printf(" . ");
-            expr_print(CDR(expr));
-            printf(")");
+            fprintf(stream, "(");
+            expr_print(stream, CAR(expr));
+            fprintf(stream, " . ");
+            expr_print(stream, CDR(expr));
+            fprintf(stream, ")");
             break;
         case E_BOOLEAN:
-            printf(expr.boolean ? "T" : "F");
+            fprintf(stream, expr.boolean ? "T" : "F");
             break;
     }
 }
 
-void expr_println(struct expr expr) {
-    expr_print(expr);
+void expr_println(FILE* stream, struct expr expr) {
+    expr_print(stream, expr);
     putchar('\n');
 }
 

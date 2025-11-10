@@ -76,8 +76,8 @@ u8 integerp(struct expr expr);
 u8 symbolp(struct expr expr);
 u8 consp(struct expr expr);
 
-void expr_print(struct expr expr);
-void expr_println(struct expr expr);
+void expr_print(FILE* stream, struct expr expr);
+void expr_println(FILE* stream, struct expr expr);
 
 bool expr_is_truthy(struct expr expr);
 

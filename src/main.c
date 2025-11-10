@@ -47,7 +47,7 @@ void repl() {
 
             expr = vm_run(&vm, compiler.module);
 
-            if (!nilp(expr)) expr_println(expr);
+            if (!nilp(expr)) expr_println(stdout, expr);
         }
 
         if (vm.running)

@@ -3,6 +3,46 @@
 A LISP-like language inspired by [Ruse](https://github.com/thep1geon/ruse) which
 is inspired by Scheme.
 
+## A Little Tour
+
+```
+(hoax)>> (+ 3 (+ 2 2))
+2
+```
+```
+(hoax)>> (cons 1 (cons 2 (cons 3)))
+(1 . (2 . (3 . nil)))
+```
+```
+(hoax)>> (car (cons 1 (cons 2 (cons 3))))
+1
+```
+```
+(hoax)>> (cdr (cons 1 (cons 2 (cons 3))))
+(2 . (3 . nil))
+```
+```
+(hoax)>> (if t 3 9)
+3
+```
+```
+(hoax)>> (if () 3 9)
+9
+```
+
+Development is still a work in progress, and as such, there are many features
+still missing. As of right now these are some of the main features in the
+current version:
+
+- Integers
+- 'cons'
+- 'car' and 'cdr'
+- 'display'
+- Basic arthimetic (excluding /)
+- 'if'
+- Builtin symbols (t, f, nil)
+- Comments
+
 ## The Motivation
 
 I want to improve on the ideas of Ruse but make it better in almost every way.

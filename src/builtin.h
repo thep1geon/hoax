@@ -1,15 +1,16 @@
 #ifndef __BUILTIN_H
 #define __BUILTIN_H
 
-struct builtin_symbol {
-    char* strlit;
-    u8 length; /* They must also adhere to the 256 character limit */
-};
+#include "generics.h"
+#include "common.h"
 
+/* ~TODO: See about implementing compile-time type checking for builtin-functions */
 struct builtin_function {
-    struct builtin_symbol symbol;
-    u8 artity;
-    u16 padding;
+    struct slice(char) name;
+    u8 arity;
+    u16 op_code;
+
+    /* u8 padding */
 };
 
 /*
@@ -48,9 +49,11 @@ struct builtin_function {
  *          of cons cell on the stack without touching the cons cell internally
  *
  * VM Related Functionality:
+ *      toggle-debug => OP_TOGGLE_DEBUG
+ *        - Toggles the module bytecode disassembly after compilation
  *      display => OP_DISPLAY
  *        - Pops the element on the top of the stack and prints it to stdout
- *      quit => OP_RETURN
+ *      quit => OP_HALT
  *        - Quits the execution of the VM. More useful in the REPL
  * */
 

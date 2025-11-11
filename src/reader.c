@@ -116,7 +116,6 @@ read_expr_begin:
         advance(reader);
         ptr = read_cons(reader);
         EXPR(ptr).loc = loc;
-        EXPR(ptr).length = expr_cons_length(EXPR(ptr));
         return ptr;
     }
 
@@ -175,8 +174,13 @@ u32 read_symbol(struct expr_reader* reader) {
     return expr_new_symbol(symbol, length);
 }
 
+/* 
+ * ~TODO: See if there is a better way to calculate the length of a list without
+ *  having to traverse the list multiple times.
+ * */
 u32 read_cons(struct expr_reader* reader) {
     u32 car;
+    u32 cons;
 
     skip_space(reader);
 
@@ -199,5 +203,9 @@ u32 read_cons(struct expr_reader* reader) {
 
     car = read_expr(reader);
 
-    return expr_new_cons(car, read_cons(reader));
+    cons = expr_new_cons(car, read_cons(reader));
+
+    EXPR(cons).length = expr_cons_length(EXPR(cons));
+
+    return cons;
 }

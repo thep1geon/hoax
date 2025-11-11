@@ -13,7 +13,7 @@ SLICE_DECL(char); /* basically a string */
 #define UNIMPLEMENTED() assert(0 && "Unimplemented");
 
 /* 
- * ~TODO: see about encoding a file location in a 32 bit integer with the
+ * ~TODO: See about encoding a file location in a 32 bit integer with the
  * first 8 bits being the column and the last 24 being the line.
  *
  * Realistically, your source code should not be exceeding 256 columns, that's
@@ -29,5 +29,7 @@ struct file_location {
 #define KILOBYTES(n) (n * 1024)
 #define MEGAMYTES(n) (KILOBYTES(n) * 1024)
 #define GIGABYTES(n) (MEGAMYTES(n) * 1024)
+
+#define ARRAY_LENGTH(xs) (sizeof(xs)/sizeof(*xs))
 
 #endif  /*__COMMON_H*/

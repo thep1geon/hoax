@@ -181,5 +181,6 @@ static u8 __expr_cons_length(struct expr expr, u8 acc) {
 }
 
 u8 expr_cons_length(struct expr expr) {
+    if (!consp(expr)) return 0;
     return __expr_cons_length(expr, 1);
 }

@@ -9,6 +9,7 @@
 #include "module.h"
 #include "vm.h"
 #include "compiler.h"
+#include "builtin.h"
 
 #define INPUT_BUFFER_CAP KILOBYTES(1)
 

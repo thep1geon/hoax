@@ -1,8 +1,25 @@
 #include <stdio.h>
 
+#include "builtin.h"
 #include "reader.h"
 #include "compiler.h"
 #include "generics.h"
+
+/* ~TODO: See if I can abstract away the direct calls to module_write_byte */
+/* ~TODO: Come up with an interface to make patching jumps simpler */
+
+static struct builtin_function functions[] = {
+    { { "+", 1 },             2, OP_ADD },
+    { { "-", 1 },             2, OP_SUB },
+    { { "*", 1 },             2, OP_MUL },
+    { { "/", 1 },             2, OP_DIV },
+    { { "car", 3 },           1, OP_CAR },
+    { { "cdr", 3 },           1, OP_CDR },
+    { { "cons", 4 },          2, OP_CONS },
+    { { "quit", 4 },          0, OP_HALT },
+    { { "display", 7 },       1, OP_DISPLAY },
+    { { "toggle-debug", 12 }, 0, OP_TOGGLE_DEBUG },
+};
 
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module) {
     compiler->reader = reader_create(src);
@@ -46,6 +63,10 @@ u8 compile_expr(struct compiler* compiler, struct expr expr) {
 }
 
 u8 compile_symbol(struct compiler* compiler, struct expr expr) {
+    /* 
+     * We probably won't have to do the whole table thing for symbols because
+     * I don't foresee having to lookup that many more symbols
+     * */
     if (memcmp(expr.symbol, "t", 1) == 0) {
         module_write_byte(compiler->module, OP_TRUE);
     } else if (memcmp(expr.symbol, "f", 1) == 0) {
@@ -70,6 +91,13 @@ u8 compile_list(struct compiler* compiler, struct expr expr) {
         return COMPILE_EXPECTED_SYMBOL;
     }
 
+    /* 
+     * But I can foresee the need to do a table for special forms like 'if',
+     * 'let', 'defun', 'define', etc.
+     *
+     * ~TODO: Create another table of special forms and their respective
+     *        compilation function.
+     * */
     if (memcmp(CAR(expr).symbol, "if", 2) == 0)
         return compile_if(compiler, expr);
 
@@ -127,52 +155,45 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
 }
 
 u8 compile_function(struct compiler* compiler, struct expr expr) {
-    /* 
-     * We already know the first element of the list is a symbol.
-     *
-     * What we need to do now is compile the arguments and then emit the bytes
-     * for the given function.
-     * */
     u8 ret;
+    u32 i;
+
+    struct builtin_function* fn = 0;
 
     struct expr car = CAR(expr);
+    struct expr args = CDR(expr);
 
-    ret = compile_args(compiler, CDR(expr));
-    if (ret != COMPILE_OK) return ret;
+    /* Search for the function in the table of functions */
+    for (i = 0; i < ARRAY_LENGTH(functions); ++i) {
+        fn = functions + i;
 
-    /*
-     * ~TODO: we need a better way to check against builtin functions
-     *
-     * ~TODO: We can actually do type checking and arity checking at compile time
-     *        for all functions.  Once a function has been registered into the
-     *        current environment, we can know how many arguments it takes and
-     *        the types of each (if the type was provided).
-     *  */
-    if (memcmp(car.symbol, "+", 1) == 0) {
-        module_write_byte(compiler->module, OP_ADD);
-    } else if (memcmp(car.symbol, "-", 1) == 0) {
-        module_write_byte(compiler->module, OP_SUB);
-    } else if (memcmp(car.symbol, "*", 1) == 0) {
-        module_write_byte(compiler->module, OP_MUL);
-    } else if (memcmp(car.symbol, "/", 1) == 0) {
-        module_write_byte(compiler->module, OP_DIV);
-    } else if (memcmp(car.symbol, "car", 3) == 0) {
-        module_write_byte(compiler->module, OP_CAR);
-    } else if (memcmp(car.symbol, "cdr", 3) == 0) {
-        module_write_byte(compiler->module, OP_CDR);
-    } else if (memcmp(car.symbol, "cons", 4) == 0) {
-        module_write_byte(compiler->module, OP_CONS);
-    } else if (memcmp(car.symbol, "quit", 4) == 0) {
-        module_write_byte(compiler->module, OP_HALT);
-    } else if (memcmp(car.symbol, "display", 7) == 0) {
-        module_write_byte(compiler->module, OP_DISPLAY);
-    } else if (memcmp(car.symbol, "toggle-debug", 12) == 0) {
-        module_write_byte(compiler->module, OP_TOGGLE_DEBUG);
-    }else {
+        if (fn->name.length == car.length) {
+            if (memcmp(fn->name.ptr, car.symbol, car.length) == 0) {
+                break;
+            }
+        }
+
+        fn = 0;
+    }
+
+    /* check to make sure we got a function */
+    if (fn == 0) {
         fprintf(stderr, "(%d:%d) error: unknown builtin function: %.*s\n", 
                 car.loc.line, car.loc.column, car.length, car.symbol);
         return COMPILE_UNKOWN_FUNCTION;
     }
+
+    /* do a compile time check of the number of arguments required by that function */
+    if (args.length != fn->arity) {
+        fprintf(stderr, "(%d:%d) error: '%.*s' takes %d arguments but only %d were provided\n", 
+                car.loc.line, car.loc.column, car.length, car.symbol, fn->arity, args.length);
+        return COMPILE_MISSING_FUNCTION_ARGS;
+    }
+
+    ret = compile_args(compiler, args);
+    if (ret != COMPILE_OK) return ret;
+
+    module_write_byte(compiler->module, fn->op_code);
 
     return COMPILE_OK;
 }

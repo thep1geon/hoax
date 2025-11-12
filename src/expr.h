@@ -3,7 +3,9 @@
 
 #include "common.h"
 
+/* ~TODO: Implement native functions */
 /* ~TODO: Implement strings */
+/* ~TODO: Implement dynamic symbols */
 
 enum expr_type {
     E_NIL,

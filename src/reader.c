@@ -115,11 +115,10 @@ read_expr_begin:
     if (char_at(reader) == '(') {
         advance(reader);
         ptr = read_cons(reader);
-        EXPR(ptr).loc = loc;
-        return ptr;
+    } else {
+        ptr = read_atom(reader);
     }
 
-    ptr = read_atom(reader);
     EXPR(ptr).loc = loc;
     return ptr;
 }

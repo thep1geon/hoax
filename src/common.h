@@ -27,8 +27,8 @@ struct file_location {
 };
 
 #define KILOBYTES(n) (n * 1024)
-#define MEGAMYTES(n) (KILOBYTES(n) * 1024)
-#define GIGABYTES(n) (MEGAMYTES(n) * 1024)
+#define MEGABYTES(n) (KILOBYTES(n) * 1024)
+#define GIGABYTES(n) (MEGABYTES(n) * 1024)
 
 #define ARRAY_LENGTH(xs) (sizeof(xs)/sizeof(*xs))
 

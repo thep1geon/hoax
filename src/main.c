@@ -27,7 +27,7 @@ void repl() {
     expr_new_nil();
 
     vm = (struct vm){0};
-    vm.running = true;
+    vm_init(&vm);
     module = (struct module){0};
 
     compiler = (struct compiler){0};
@@ -64,6 +64,7 @@ void repl() {
 
     if (compiler.module)
         module_destroy(compiler.module);
+    vm_destroy(&vm);
     DYNARRAY_FREE(&exprs);
 }
 
@@ -96,7 +97,7 @@ void file(char* filename) {
     expr_new_nil();
 
     vm = (struct vm){0};
-    vm.running = true;
+    vm_init(&vm);
     module = (struct module){0};
 
     compiler = (struct compiler){0};
@@ -108,6 +109,7 @@ void file(char* filename) {
 
     module_destroy(compiler.module);
     DYNARRAY_FREE(&exprs);
+    vm_destroy(&vm);
     free(file_contents);
 }
 

@@ -62,7 +62,7 @@ u32 expr_new_boolean(bool boolean);
 u32 expr_new_integer(i64 integer);
 u32 expr_new_symbol(char* symbol, u8 length);
 u32 expr_new_cons(u32 car, u32 cdr);
-u32 expr_new_native(native_fn fn);
+u32 expr_new_native(native_fn fn, u8 arity);
 
 struct expr expr_create();
 struct expr expr_create_nil();
@@ -70,7 +70,7 @@ struct expr expr_create_boolean(bool boolean);
 struct expr expr_create_integer(i64 integer);
 struct expr expr_create_symbol(char* symbol, u8 length);
 struct expr expr_create_cons(u32 car, u32 cdr);
-struct expr expr_create_native(native_fn fn);
+struct expr expr_create_native(native_fn fn, u8 arity);
 
 /* Takes an index (pointer) into the expr array and returns the associated expr */
 #define EXPR(ptr) exprs.at[(ptr)]
@@ -95,5 +95,8 @@ void expr_println(FILE* stream, struct expr expr);
 bool expr_is_truthy(struct expr expr);
 
 u8 expr_cons_length(struct expr expr);
+void expr_cons_append(u32 list, struct expr expr);
+
+struct expr expr_native_call(struct expr func, struct expr args);
 
 #endif  /*__EXPR_H*/

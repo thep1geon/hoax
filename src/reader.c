@@ -57,6 +57,7 @@ static inline bool is_special_char(char c) {
         case '&':
         case '_':
         case '~':
+        case '#':
             return true;
         default:
             return false;

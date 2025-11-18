@@ -71,11 +71,12 @@ u32 expr_new_cons(u32 car, u32 cdr) {
     return ptr;
 }
 
-u32 expr_new_native(native_fn fn) {
+u32 expr_new_native(native_fn fn, u8 arity) {
     u32 ptr = expr_new();
 
     exprs.at[ptr].type = E_NATIVE;
     exprs.at[ptr].native = fn;
+    exprs.at[ptr].arity = arity;
 
     return ptr;
 }
@@ -126,10 +127,11 @@ struct expr expr_create_cons(u32 car, u32 cdr) {
     return expr;
 }
 
-struct expr expr_create_native(native_fn fn) {
+struct expr expr_create_native(native_fn fn, u8 arity) {
     struct expr expr = expr_create();
     expr.type = E_NATIVE;
     expr.native = fn;
+    expr.arity = arity;
 
     return expr;
 }
@@ -207,4 +209,25 @@ static u8 __expr_cons_length(struct expr expr, u8 acc) {
 u8 expr_cons_length(struct expr expr) {
     if (!consp(expr)) return 0;
     return __expr_cons_length(expr, 1);
+}
+
+void expr_cons_append(u32 list, struct expr expr) {
+    if (EXPR(list).cdr == 0) {
+        assert(consp(EXPR(list)));
+        if (EXPR(list).car == 0) {
+            EXPR(list).car = expr_box(expr);
+        } else {
+            EXPR(list).cdr = expr_new_cons(expr_box(expr), 0);
+        }
+
+        return;
+    }
+
+    expr_cons_append(EXPR(list).cdr, expr);
+}
+
+struct expr expr_native_call(struct expr func, struct expr args) {
+    assert(nativep(func));
+
+    return func.native(args);
 }

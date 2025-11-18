@@ -3,6 +3,17 @@
 #include "vm.h"
 #include "module.h"
 
+void vm_init(struct vm* vm) {
+    vm_set_global(vm, STRING("#display"), expr_create_native(native_display, 1));
+    vm_set_global(vm, STRING("#hello"), expr_create_native(native_hello, 0));
+
+    vm->running = true;
+}
+
+void vm_destroy(struct vm* vm) {
+    map_destroy(&vm->global_map);
+}
+
 u8 vm_fetch_u8(struct vm* vm) {
     vm->ip += 1;
     return *(vm->ip - 1);
@@ -13,11 +24,45 @@ u16 vm_fetch_u16(struct vm* vm) {
     return ((u16)(*(vm->ip - 2)) << 8) | *(vm->ip - 1);
 }
 
-struct expr vm_function_call(struct vm* vm, struct slice(char) name, struct expr args) {
-    UNUSED(vm);
-    UNUSED(name);
-    UNUSED(args);
-    UNIMPLEMENTED();
+struct expr vm_get_const(struct vm* vm, u8 const_index) {
+    return vm->module->constants.at[const_index];
+}
+
+struct expr vm_get_global(struct vm* vm, struct slice(char) name) {
+    return map_get(&vm->global_map, name);
+}
+
+struct expr vm_set_global(struct vm* vm, struct slice(char) name, struct expr expr) {
+    return map_set(&vm->global_map, name, expr);
+}
+
+struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
+    u8 arity;
+    struct expr arg, func;
+    u32 args;
+
+
+    func = vm_get_global(vm, name);
+
+    /* the function was not found */
+    if (nilp(func)) {
+        UNIMPLEMENTED();
+    }
+
+    assert(nativep(func));
+
+    arity = func.arity;
+
+    args = expr_new_cons(0, 0);
+
+    while (arity--) {
+        arg = vm_pop(vm);
+        assert(!nilp(arg));
+        expr_cons_append(args, arg);
+    }
+
+
+    return expr_native_call(func, CAR(EXPR(args)));
 }
 
 struct expr vm_push(struct vm* vm, struct expr expr) {
@@ -32,10 +77,6 @@ struct expr vm_pop(struct vm* vm) {
 struct expr vm_peek(struct vm* vm) {
     if (vm->sp == 0) return expr_create_nil();
     return vm->stack[vm->sp - 1];
-}
-
-struct expr vm_get_const(struct vm* vm, u8 const_index) {
-    return vm->module->constants.at[const_index];
 }
 
 struct expr vm_run(struct vm* vm, struct module* module) {
@@ -94,12 +135,10 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 /* the name of the function */
                 expr = vm_pop(vm);
                 assert(symbolp(expr));
-                a = vm_pop(vm);
-                vm_function_call(
+                vm_push(vm, vm_function_call(
                     vm,
-                    (struct slice(char)){.ptr = expr.symbol, .length = expr.length}, 
-                    a
-                );
+                    (struct slice(char)){.ptr = expr.symbol, .length = expr.length}
+                ));
                 break;
             case OP_NIL:
                 vm_push(vm, expr_create_nil());

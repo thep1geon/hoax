@@ -162,8 +162,8 @@ u8 compile_function(struct compiler* compiler, struct expr expr) {
         return ret;
     }
 
-    module_write_byte(compiler->module, OP_CONSTANT);
-    module_write_byte(compiler->module, module_write_const(compiler->module, CDR(expr)));
+    ret = compile_args(compiler, CDR(expr));
+    if (ret != COMPILE_OK) return ret;
     module_write_byte(compiler->module, OP_CONSTANT);
     module_write_byte(compiler->module, module_write_const(compiler->module, CAR(expr)));
     module_write_byte(compiler->module, OP_CALL);

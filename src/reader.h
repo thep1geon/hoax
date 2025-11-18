@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* ~TODO: Implement a way to convey errors while reading */
+/* @TODO: Implement a way to convey errors while reading */
 
 struct expr_reader {
     struct slice(char) src;

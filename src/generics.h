@@ -113,6 +113,8 @@
 
 #include "typedef.h"
 
+/* @TODO: Think about making a generic string-hashmap */
+
 /* Dynamic Arrays */
 
 #define dynarray(T) dynarray__##T
@@ -238,7 +240,7 @@
         struct linked_list_node(T)* curr_node;\
         T item;\
         usize i;\
-        struct linked_list_node(T) curr_node = (this)->head;\
+        curr_node = (list)->head;\
         if (list->length <= 0) return (struct option(T))OPTION_NONE();\
         list->length -= 1;\
         for (i = 0; i < list->length; ++i) {\
@@ -286,6 +288,11 @@
     struct option(T) linked_list__##T##_pop_back(struct linked_list(T)* list);\
     struct option(T) linked_list__##T##_pop_front(struct linked_list(T)* list);\
     void linked_list__##T##_free(struct linked_list(T)* list)
+
+/* 
+ * @TODO: I'm pretty sure these linked list implementations are broken. This is
+ * not of utmost importance as I'm not using linked lists right now, but I might.
+ * */
 
 #define LINKED_LIST_IMPL_S(T) \
     void linked_list__##T##_push_back(struct linked_list(T)* list, struct T e) {\
@@ -393,9 +400,11 @@
 #define SLICE_FROM_ARR(arr, start, end) {.ptr = (arr)+(start), .length = (end)-(start)}
 
 /* 
- * Useful little string function for turning string literals into slices of 
- * characters
+ * WARN: This macro will evaulate the input the slice multiple times, so
+ * make sure you know of that before using.
  * */
-#define STRING(strlit) (struct slice(char)){.ptr = (strlit), .length = strlen((strlit))}
+#define SLICE_FOR_EACH(slice, e)\
+    for (usize __iter = 0; __iter < (slice).length && ((e = (slice).ptr[__iter]), true); ++__iter)
+
 
 #endif  /*__GENERICS_H*/

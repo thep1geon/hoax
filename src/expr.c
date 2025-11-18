@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "expr.h"
+#include "native.h"
 
 DYNARRAY_IMPL_S(expr);
 
@@ -70,6 +71,15 @@ u32 expr_new_cons(u32 car, u32 cdr) {
     return ptr;
 }
 
+u32 expr_new_native(native_fn fn) {
+    u32 ptr = expr_new();
+
+    exprs.at[ptr].type = E_NATIVE;
+    exprs.at[ptr].native = fn;
+
+    return ptr;
+}
+
 struct expr expr_create() {
     return (struct expr){0};
 }
@@ -116,6 +126,14 @@ struct expr expr_create_cons(u32 car, u32 cdr) {
     return expr;
 }
 
+struct expr expr_create_native(native_fn fn) {
+    struct expr expr = expr_create();
+    expr.type = E_NATIVE;
+    expr.native = fn;
+
+    return expr;
+}
+
 /* Takes an index (pointer) into the expr array and returns the associated expr */
 #define EXPR(ptr) exprs.at[(ptr)]
 
@@ -127,6 +145,7 @@ u8 boolp(struct expr expr) { return expr.type == E_BOOLEAN; }
 u8 integerp(struct expr expr) { return expr.type == E_INTEGER; }
 u8 symbolp(struct expr expr) { return expr.type == E_SYMBOL; }
 u8 consp(struct expr expr) { return expr.type == E_CONS; }
+u8 nativep(struct expr expr) { return expr.type == E_NATIVE; }
 
 void expr_print(FILE* stream, struct expr expr) {
     switch ((enum expr_type) expr.type) {
@@ -149,6 +168,9 @@ void expr_print(FILE* stream, struct expr expr) {
         case E_BOOLEAN:
             fprintf(stream, expr.boolean ? "T" : "F");
             break;
+        case E_NATIVE:
+            fprintf(stream, "<native fn>");
+            break;
     }
 }
 
@@ -167,6 +189,8 @@ bool expr_is_truthy(struct expr expr) {
             return expr.integer != 0;
         case E_CONS:
             return expr.length != 0;
+        case E_NATIVE:
+            return expr.native != NULL;
         case E_SYMBOL:
             UNIMPLEMENTED();
    }

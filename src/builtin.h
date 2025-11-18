@@ -4,7 +4,7 @@
 #include "generics.h"
 #include "common.h"
 
-/* ~TODO: See about implementing compile-time type checking for builtin-functions */
+/* @TODO: See about implementing compile-time type checking for builtin-functions */
 struct builtin_function {
     struct slice(char) name;
     u8 arity;

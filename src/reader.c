@@ -139,6 +139,8 @@ u32 read_atom(struct expr_reader* reader) {
         fprintf(stderr, "(%d:%d) error: unknown character: '%c'\n", 
                 reader->current_location.line, reader->current_location.column, char_at(reader));
 
+    advance(reader);
+
     return 0;
 }
 
@@ -174,7 +176,7 @@ u32 read_symbol(struct expr_reader* reader) {
 }
 
 /* 
- * ~TODO: See if there is a better way to calculate the length of a list without
+ * @TODO: See if there is a better way to calculate the length of a list without
  *  having to traverse the list multiple times.
  * */
 u32 read_cons(struct expr_reader* reader) {
@@ -189,14 +191,14 @@ u32 read_cons(struct expr_reader* reader) {
     }
 
     /* 
-     * ~TODO: Somehow figure out where the missing closing paren is supossed to
+     * @TODO: Somehow figure out where the missing closing paren is supossed to
      *       go.
      * */
     if (!bound(reader)) {
         fprintf(stderr, "(%d:%d): error: expected ')', found EOF instead\n",
                 reader->current_location.line,
                 reader->current_location.column);
-        /* ~TODO: Find a better way to handle the error */
+        /* @TODO: Find a better way to handle the error */
         exit(1);
     }
 

@@ -13,6 +13,13 @@ u16 vm_fetch_u16(struct vm* vm) {
     return ((u16)(*(vm->ip - 2)) << 8) | *(vm->ip - 1);
 }
 
+struct expr vm_function_call(struct vm* vm, struct slice(char) name, struct expr args) {
+    UNUSED(vm);
+    UNUSED(name);
+    UNUSED(args);
+    UNIMPLEMENTED();
+}
+
 struct expr vm_push(struct vm* vm, struct expr expr) {
     return vm->stack[vm->sp++] = expr;
 }
@@ -82,6 +89,17 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 if (!expr_is_truthy(expr)) {
                     vm->ip += jump_offset;
                 }
+                break;
+            case OP_CALL:
+                /* the name of the function */
+                expr = vm_pop(vm);
+                assert(symbolp(expr));
+                a = vm_pop(vm);
+                vm_function_call(
+                    vm,
+                    (struct slice(char)){.ptr = expr.symbol, .length = expr.length}, 
+                    a
+                );
                 break;
             case OP_NIL:
                 vm_push(vm, expr_create_nil());

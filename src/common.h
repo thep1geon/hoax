@@ -2,18 +2,19 @@
 #define __COMMON_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "typedef.h"
 
 /* Gives us dynamic arrays, linked lists, slices, and optionals */
 #include "generics.h"
-SLICE_DECL(char); /* basically a string */
+#include "string.h"
 
 #define UNUSED(v) (void)v
 #define UNIMPLEMENTED() assert(0 && "Unimplemented");
 
 /* 
- * ~TODO: See about encoding a file location in a 32 bit integer with the
+ * @TODO: See about encoding a file location in a 32 bit integer with the
  * first 8 bits being the column and the last 24 being the line.
  *
  * Realistically, your source code should not be exceeding 256 columns, that's
@@ -31,5 +32,7 @@ struct file_location {
 #define GIGABYTES(n) (MEGABYTES(n) * 1024)
 
 #define ARRAY_LENGTH(xs) (sizeof(xs)/sizeof(*xs))
+#define ARRAY_FOR_EACH(arr, e) \
+    for (usize __iter = 0; __iter < ARRAY_LENGTH((arr)) && ((e = (arr)[__iter]) || true); ++__iter)
 
 #endif  /*__COMMON_H*/

@@ -17,6 +17,9 @@ enum op_code {
     OP_JMP, /* unconditional jump */
     OP_JMF, /* jump if the top of the stack is falsy */
 
+    /* function whatsnots */
+    OP_CALL,
+
     /* cons / heap stuff */
     OP_CONS,
     OP_CAR,
@@ -34,7 +37,7 @@ enum op_code {
     OP_RETURN,
     OP_HALT,
 
-    /* ~TODO: Turn these from VM op_codes to native C functions */
+    /* @TODO: Turn these from VM op_codes to native C functions */
     /* virtual machine builtins */
     OP_DISPLAY,
     OP_TOGGLE_DEBUG,

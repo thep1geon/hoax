@@ -61,6 +61,9 @@ void module_disassemble(struct module* module) {
                 printf("OP_JMF %d\n", __module_get_u16(module, offset));
                 offset += 1;
                 break;
+            case OP_CALL:
+                puts("OP_CALL");
+                break;
             case OP_TRUE:
                 puts("OP_TRUE");
                 break;

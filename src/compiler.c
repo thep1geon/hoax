@@ -5,8 +5,8 @@
 #include "compiler.h"
 #include "generics.h"
 
-/* ~TODO: See if I can abstract away the direct calls to module_write_byte */
-/* ~TODO: Come up with an interface to make patching jumps simpler */
+/* @TODO: See if I can abstract away the direct calls to module_write_byte */
+/* @TODO: Come up with an interface to make patching jumps simpler */
 
 static struct builtin_function functions[] = {
     { { "+", 1 },             2, OP_ADD },
@@ -56,6 +56,7 @@ u8 compile_expr(struct compiler* compiler, struct expr expr) {
             return compile_symbol(compiler, expr);
         case E_NIL:
         case E_BOOLEAN:
+        case E_NATIVE:
             break;
     }
 
@@ -95,7 +96,7 @@ u8 compile_list(struct compiler* compiler, struct expr expr) {
      * But I can foresee the need to do a table for special forms like 'if',
      * 'let', 'defun', 'define', etc.
      *
-     * ~TODO: Create another table of special forms and their respective
+     * @TODO: Create another table of special forms and their respective
      *        compilation function.
      * */
     if (memcmp(CAR(expr).symbol, "if", 2) == 0)
@@ -156,6 +157,22 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
 
 u8 compile_function(struct compiler* compiler, struct expr expr) {
     u8 ret;
+
+    if ((ret = compile_builtin_function(compiler, expr)) != COMPILE_UNKOWN_FUNCTION) {
+        return ret;
+    }
+
+    module_write_byte(compiler->module, OP_CONSTANT);
+    module_write_byte(compiler->module, module_write_const(compiler->module, CDR(expr)));
+    module_write_byte(compiler->module, OP_CONSTANT);
+    module_write_byte(compiler->module, module_write_const(compiler->module, CAR(expr)));
+    module_write_byte(compiler->module, OP_CALL);
+
+    return COMPILE_OK;
+}
+
+u8 compile_builtin_function(struct compiler* compiler, struct expr expr) {
+    u8 ret;
     u32 i;
 
     struct builtin_function* fn = 0;
@@ -178,8 +195,6 @@ u8 compile_function(struct compiler* compiler, struct expr expr) {
 
     /* check to make sure we got a function */
     if (fn == 0) {
-        fprintf(stderr, "(%d:%d) error: unknown builtin function: %.*s\n", 
-                car.loc.line, car.loc.column, car.length, car.symbol);
         return COMPILE_UNKOWN_FUNCTION;
     }
 

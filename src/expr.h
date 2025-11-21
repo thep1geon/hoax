@@ -4,18 +4,17 @@
 #include "common.h"
 #include "native.h"
 
-/* @TODO: Implement native functions */
 /* @TODO: Implement strings */
 /* @TODO: Implement dynamic symbols */
 /* @TODO: Update the enum prefix to EXPR from E */
 
 enum expr_type {
-    E_NIL,
-    E_BOOLEAN,
-    E_INTEGER,
-    E_CONS,
-    E_SYMBOL,
-    E_NATIVE,
+    EXPR_NIL,
+    EXPR_BOOLEAN,
+    EXPR_INTEGER,
+    EXPR_CONS,
+    EXPR_SYMBOL,
+    EXPR_NATIVE,
 };
 
 struct expr {

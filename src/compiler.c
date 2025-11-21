@@ -46,17 +46,17 @@ u8 compile(struct compiler* compiler) {
 
 u8 compile_expr(struct compiler* compiler, struct expr expr) {
     switch ((enum expr_type)expr.type) {
-        case E_INTEGER:
+        case EXPR_INTEGER:
             module_write_byte(compiler->module, OP_CONSTANT);
             module_write_byte(compiler->module, module_write_const(compiler->module, expr));
             break;
-        case E_CONS:
+        case EXPR_CONS:
             return compile_list(compiler, expr);
-        case E_SYMBOL:
+        case EXPR_SYMBOL:
             return compile_symbol(compiler, expr);
-        case E_NIL:
-        case E_BOOLEAN:
-        case E_NATIVE:
+        case EXPR_NIL:
+        case EXPR_BOOLEAN:
+        case EXPR_NATIVE:
             break;
     }
 

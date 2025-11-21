@@ -37,9 +37,7 @@ enum op_code {
     OP_RETURN,
     OP_HALT,
 
-    /* @TODO: Turn these from VM op_codes to native C functions */
-    /* virtual machine builtins */
-    OP_DISPLAY,
+    /* virtual machine interactions */
     OP_TOGGLE_DEBUG,
 };
 

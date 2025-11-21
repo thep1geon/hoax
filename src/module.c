@@ -73,9 +73,6 @@ void module_disassemble(struct module* module) {
             case OP_NIL:
                 puts("OP_NIL");
                 break;
-            case OP_DISPLAY:
-                puts("OP_DISPLAY");
-                break;
             case OP_CONS:
                 puts("OP_CONS");
                 break;

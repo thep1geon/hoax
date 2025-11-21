@@ -8,6 +8,7 @@
 /* @TODO: See if I can abstract away the direct calls to module_write_byte */
 /* @TODO: Come up with an interface to make patching jumps simpler */
 
+/* @TODO: Replace this with a map since we have that now */
 static struct builtin_function functions[] = {
     { { "+", 1 },             2, OP_ADD },
     { { "-", 1 },             2, OP_SUB },
@@ -17,7 +18,6 @@ static struct builtin_function functions[] = {
     { { "cdr", 3 },           1, OP_CDR },
     { { "cons", 4 },          2, OP_CONS },
     { { "quit", 4 },          0, OP_HALT },
-    { { "display", 7 },       1, OP_DISPLAY },
     { { "toggle-debug", 12 }, 0, OP_TOGGLE_DEBUG },
 };
 

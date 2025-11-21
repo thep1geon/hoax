@@ -211,19 +211,32 @@ u8 expr_cons_length(struct expr expr) {
     return __expr_cons_length(expr, 1);
 }
 
-void expr_cons_append(u32 list, struct expr expr) {
-    if (EXPR(list).cdr == 0) {
-        assert(consp(EXPR(list)));
-        if (EXPR(list).car == 0) {
-            EXPR(list).car = expr_box(expr);
-        } else {
-            EXPR(list).cdr = expr_new_cons(expr_box(expr), 0);
-        }
+u32 expr_cons_append(u32 list, struct expr expr) {
+    u32 cdr;
+    if (list == 0) return expr_new_cons(expr_box(expr), 0);
 
-        return;
-    }
+    cdr = EXPR(list).cdr;
 
-    expr_cons_append(EXPR(list).cdr, expr);
+
+    EXPR(list).cdr = expr_cons_append(cdr, expr);
+    return list;
+}
+
+/*
+  (define .rev (lambda (xs acc)
+                (cond
+                    ((empty? xs) acc)
+                    (else (let ( (x (car xs)) 
+                               (.rev (cdr xs) (cons x) acc))))))))
+*/
+
+u32 __expr_cons_reverse(u32 list, u32 acc) {
+    if (expr_cons_length(EXPR(list)) == 0) return acc;
+    return __expr_cons_reverse(EXPR(list).cdr, expr_new_cons(EXPR(list).car, acc));
+}
+
+u32 expr_cons_reverse(u32 list) {
+    return __expr_cons_reverse(list, 0);
 }
 
 struct expr expr_native_call(struct expr func, struct expr args) {

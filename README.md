@@ -42,6 +42,7 @@ current version:
 - 'if'
 - Builtin symbols (t, f, nil)
 - Comments
+- Builtin functions from C (#display, #hello)
 
 ## The Motivation
 
@@ -116,6 +117,7 @@ to make the next JVM by any means, but we still want our VM to be useful.
 - [ ] Hoax Virtual Machine
     - [x] Interpret hand-made VM chunks of code
     - [ ] Call C functions from the HXVM
+        - [x] Native functions built into the HXVM
 - [x] Start compiling Hoax to HVM byte code
     - [x] Parsing
     - [ ] Other semantic analysis

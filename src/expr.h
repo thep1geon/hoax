@@ -95,7 +95,8 @@ void expr_println(FILE* stream, struct expr expr);
 bool expr_is_truthy(struct expr expr);
 
 u8 expr_cons_length(struct expr expr);
-void expr_cons_append(u32 list, struct expr expr);
+u32 expr_cons_append(u32 list, struct expr expr);
+u32 expr_cons_reverse(u32 list);
 
 struct expr expr_native_call(struct expr func, struct expr args);
 

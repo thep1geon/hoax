@@ -6,6 +6,7 @@
 void vm_init(struct vm* vm) {
     vm_set_global(vm, STRING("#display"), expr_create_native(native_display, 1));
     vm_set_global(vm, STRING("#hello"), expr_create_native(native_hello, 0));
+    vm_set_global(vm, STRING("#+"), expr_create_native(native_add, 2));
 
     vm->running = true;
 }
@@ -36,6 +37,13 @@ struct expr vm_set_global(struct vm* vm, struct slice(char) name, struct expr ex
     return map_set(&vm->global_map, name, expr);
 }
 
+/* 
+ * @TODO: Figure out if there is a better way of passing arguments on the stack.
+ *
+ * Right now we are passing them in reverse order.  This is a problem if a function
+ * expects multiple arguments and more were provided than needed.  With the way
+ * it works now, the last arguments are on the ones passed into the function.
+ * */
 struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
     u8 arity;
     struct expr arg, func;
@@ -46,23 +54,26 @@ struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
 
     /* the function was not found */
     if (nilp(func)) {
-        UNIMPLEMENTED();
+        fprintf(stderr, "%.*s was not found\n", STRINGF(name));
+        return expr_create_nil();
     }
 
     assert(nativep(func));
 
     arity = func.arity;
 
-    args = expr_new_cons(0, 0);
+    args = 0;
 
-    while (arity--) {
+    while (arity) {
         arg = vm_pop(vm);
         assert(!nilp(arg));
-        expr_cons_append(args, arg);
+        args = expr_cons_append(args, arg);
+        arity--;
     }
 
+    args = expr_cons_reverse(args);
 
-    return expr_native_call(func, CAR(EXPR(args)));
+    return expr_native_call(func, EXPR(args));
 }
 
 struct expr vm_push(struct vm* vm, struct expr expr) {
@@ -157,10 +168,6 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 expr = vm_peek(vm);
                 assert(consp(expr));
                 vm_push(vm, CDR(vm_peek(vm)));
-                break;
-            case OP_DISPLAY:
-                expr = vm_pop(vm);
-                expr_println(stdout, expr);
                 break;
             case OP_TOGGLE_DEBUG:
                 vm->debug = !vm->debug;

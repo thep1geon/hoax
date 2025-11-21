@@ -16,6 +16,7 @@
 
 SLICE_DECL_S(slice__char);
 
+/* @TODO: Implement readline functionality into the repl for a better experience */
 void repl() {
     struct vm vm;
     struct module module;

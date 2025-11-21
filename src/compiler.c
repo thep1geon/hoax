@@ -87,7 +87,7 @@ u8 compile_list(struct compiler* compiler, struct expr expr) {
     if (!symbolp(CAR(expr))) {
         fprintf(stderr, "(%d:%d) error: the first element of a list must be a symbol:\n\t'",
                 expr.loc.line, expr.loc.column);
-        expr_print(stderr, expr);
+        expr_fprint(stderr, expr);
         fprintf(stderr, "'\n");
         return COMPILE_EXPECTED_SYMBOL;
     }
@@ -116,7 +116,7 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
     if (expr.length != 4) {
         fprintf(stderr, "(%d:%d) error: if expressions must have 4 parts:\n\t'",
                 expr.loc.line, expr.loc.column);
-        expr_print(stderr, expr);
+        expr_fprint(stderr, expr);
         fprintf(stderr, "'\n");
         return COMPILE_EXPECTED_ARGS;
     }

@@ -89,7 +89,7 @@ void module_disassemble(struct module* module) {
                 offset += 1;
                 const_index = module->code.at[offset];
                 printf("OP_CONSTANT %d (", const_index);
-                expr_print(stdout, module->constants.at[const_index]);
+                expr_print(module->constants.at[const_index]);
                 printf(")\n");
                 break;
         }

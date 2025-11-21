@@ -149,7 +149,15 @@ u8 symbolp(struct expr expr) { return expr.type == EXPR_SYMBOL; }
 u8 consp(struct expr expr) { return expr.type == EXPR_CONS; }
 u8 nativep(struct expr expr) { return expr.type == EXPR_NATIVE; }
 
-void expr_print(FILE* stream, struct expr expr) {
+void expr_print(struct expr expr) {
+    expr_fprint(stdout, expr);
+}
+
+void expr_println(struct expr expr) {
+    expr_fprintln(stdout, expr);
+}
+
+void expr_fprint(FILE* stream, struct expr expr) {
     switch ((enum expr_type) expr.type) {
         case EXPR_NIL:
             fprintf(stream, "nil");
@@ -162,9 +170,9 @@ void expr_print(FILE* stream, struct expr expr) {
             break;
         case EXPR_CONS:
             fprintf(stream, "(");
-            expr_print(stream, CAR(expr));
+            expr_fprint(stream, CAR(expr));
             fprintf(stream, " . ");
-            expr_print(stream, CDR(expr));
+            expr_fprint(stream, CDR(expr));
             fprintf(stream, ")");
             break;
         case EXPR_BOOLEAN:
@@ -176,8 +184,8 @@ void expr_print(FILE* stream, struct expr expr) {
     }
 }
 
-void expr_println(FILE* stream, struct expr expr) {
-    expr_print(stream, expr);
+void expr_fprintln(FILE* stream, struct expr expr) {
+    expr_fprint(stream, expr);
     putchar('\n');
 }
 

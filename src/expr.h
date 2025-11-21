@@ -6,7 +6,6 @@
 
 /* @TODO: Implement strings */
 /* @TODO: Implement dynamic symbols */
-/* @TODO: Update the enum prefix to EXPR from E */
 
 enum expr_type {
     EXPR_NIL,
@@ -84,12 +83,10 @@ u8 symbolp(struct expr expr);
 u8 consp(struct expr expr);
 u8 nativep(struct expr expr);
 
-/* 
- * @TODO: Have a default function which prints to stdout and have a different
- *        set of functions to specify the FILE to print to.
- * */
-void expr_print(FILE* stream, struct expr expr);
-void expr_println(FILE* stream, struct expr expr);
+void expr_fprint(FILE* stream, struct expr expr);
+void expr_fprintln(FILE* stream, struct expr expr);
+void expr_print(struct expr expr);
+void expr_println(struct expr expr);
 
 bool expr_is_truthy(struct expr expr);
 

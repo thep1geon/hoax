@@ -15,7 +15,7 @@ enum compiler_status {
 };
 
 struct compiler {
-    struct expr_reader reader;
+    struct reader reader;
     struct module* module;
 };
 

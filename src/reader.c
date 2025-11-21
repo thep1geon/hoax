@@ -5,11 +5,11 @@
 #include "expr.h"
 #include "reader.h"
 
-struct expr_reader reader_create(struct slice(char) src) {
-    return (struct expr_reader){ src, 0, (struct file_location){ 1, 1 } };
+struct reader reader_create(struct slice(char) src) {
+    return (struct reader){ src, 0, (struct file_location){ 1, 1 } };
 }
 
-static inline void advance(struct expr_reader* reader) {
+static inline void advance(struct reader* reader) {
     reader->current_location.column += 1;
 
     if (reader->src.ptr[reader->cursor] == '\n') {
@@ -68,25 +68,25 @@ static inline bool is_symbol(char c) {
     return is_digit(c) || is_alpha(c) || is_special_char(c);
 }
 
-static inline u8 bound(struct expr_reader* reader) {
+static inline u8 bound(struct reader* reader) {
     return reader->cursor < reader->src.length;
 }
 
-static inline void skip_space(struct expr_reader* reader) {
+static inline void skip_space(struct reader* reader) {
     while (bound(reader) && is_space(reader->src.ptr[reader->cursor]))
         advance(reader);
 }
 
-static inline char char_at(struct expr_reader* reader) {
+static inline char char_at(struct reader* reader) {
     return reader->src.ptr[reader->cursor];
 }
 
-static inline char char_peek(struct expr_reader* reader) {
+static inline char char_peek(struct reader* reader) {
     if (reader->cursor + 1 >= reader->src.length) return '\0';
     return reader->src.ptr[reader->cursor + 1];
 }
 
-static inline void skip_comment(struct expr_reader* reader) {
+static inline void skip_comment(struct reader* reader) {
     while (bound(reader) && char_at(reader) != '\n') {
         advance(reader);
     }
@@ -94,7 +94,7 @@ static inline void skip_comment(struct expr_reader* reader) {
     advance(reader);
 }
 
-u32 read_expr(struct expr_reader* reader) {
+u32 read_expr(struct reader* reader) {
 read_expr_begin:
     struct file_location loc;
     u32 ptr;
@@ -124,7 +124,7 @@ read_expr_begin:
     return ptr;
 }
 
-u32 read_atom(struct expr_reader* reader) {
+u32 read_atom(struct reader* reader) {
     if (is_digit(char_at(reader))) {
         return read_integer(reader);
     }
@@ -145,7 +145,7 @@ u32 read_atom(struct expr_reader* reader) {
     return 0;
 }
 
-u32 read_integer(struct expr_reader* reader) {
+u32 read_integer(struct reader* reader) {
     char buf[32] = {0};
     usize buf_ptr = 0;
     i64 integer;
@@ -163,7 +163,7 @@ u32 read_integer(struct expr_reader* reader) {
     return expr_new_integer(integer);
 }
 
-u32 read_symbol(struct expr_reader* reader) {
+u32 read_symbol(struct reader* reader) {
     u8 length = 1;
     char* symbol = reader->src.ptr + reader->cursor;
     advance(reader);
@@ -180,7 +180,7 @@ u32 read_symbol(struct expr_reader* reader) {
  * @TODO: See if there is a better way to calculate the length of a list without
  *  having to traverse the list multiple times.
  * */
-u32 read_cons(struct expr_reader* reader) {
+u32 read_cons(struct reader* reader) {
     u32 car;
     u32 cons;
 

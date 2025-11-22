@@ -5,9 +5,6 @@
 #include "compiler.h"
 #include "generics.h"
 
-/* @TODO: See if I can abstract away the direct calls to module_write_byte */
-/* @TODO: Come up with an interface to make patching jumps simpler */
-
 /* @TODO: Replace this with a map since we have that now */
 static struct builtin_function functions[] = {
     { { "+", 1 },             2, OP_ADD },
@@ -24,6 +21,30 @@ static struct builtin_function functions[] = {
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module) {
     compiler->reader = reader_create(src);
     compiler->module = module;
+}
+
+static inline u8 emit_byte(struct compiler* compiler, u8 byte) {
+    module_write_byte(compiler->module, byte);
+    return compiler->module->code.length;
+}
+
+static inline u8 emit_constant(struct compiler* compiler, struct expr expr) {
+    emit_byte(compiler, OP_CONSTANT);
+    return emit_byte(compiler, module_write_const(compiler->module, expr));
+}
+
+static inline u8 emit_jmp(struct compiler* compiler, u8 jmp) {
+    emit_byte(compiler, jmp);
+    emit_byte(compiler, 0x00);
+    return emit_byte(compiler, 0x00);
+}
+
+static inline void patch_jmp(struct compiler* compiler, u32 jmp_save) {
+    u16 jmp_offset;
+
+    jmp_offset = compiler->module->code.length - jmp_save;
+    compiler->module->code.at[jmp_save-2] = (u8)(((u16)jmp_offset >> 8) & 0xFF);
+    compiler->module->code.at[jmp_save-1] = ((u8) jmp_offset) & 0xFF;
 }
 
 u8 compile(struct compiler* compiler) {
@@ -44,7 +65,7 @@ u8 compile(struct compiler* compiler) {
         if (ret != COMPILE_OK) break;
     }
 
-    module_write_byte(compiler->module, OP_RETURN);
+    emit_byte(compiler, OP_RETURN);
 
     return ret;
 }
@@ -52,8 +73,7 @@ u8 compile(struct compiler* compiler) {
 u8 compile_expr(struct compiler* compiler, struct expr expr) {
     switch ((enum expr_type)expr.type) {
         case EXPR_INTEGER:
-            module_write_byte(compiler->module, OP_CONSTANT);
-            module_write_byte(compiler->module, module_write_const(compiler->module, expr));
+            emit_constant(compiler, expr);
             break;
         case EXPR_CONS:
             return compile_list(compiler, expr);
@@ -74,11 +94,11 @@ u8 compile_symbol(struct compiler* compiler, struct expr expr) {
      * I don't foresee having to lookup that many more symbols
      * */
     if (memcmp(expr.symbol, "t", 1) == 0) {
-        module_write_byte(compiler->module, OP_TRUE);
+        emit_byte(compiler, OP_TRUE);
     } else if (memcmp(expr.symbol, "f", 1) == 0) {
-        module_write_byte(compiler->module, OP_FALSE);
+        emit_byte(compiler, OP_FALSE);
     } else if (memcmp(expr.symbol, "nil", 3) == 0) {
-        module_write_byte(compiler->module, OP_NIL);
+        emit_byte(compiler, OP_NIL);
     } else {
         fprintf(stderr, "(%d:%d) error: unknown builtin symbol: %.*s\n", 
                 expr.loc.line, expr.loc.column, expr.length, expr.symbol);
@@ -115,7 +135,6 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
     struct expr then_branch;
     struct expr else_branch;
     u32 jmf_save, jmp_save;
-    u16 jmf_offset, jmp_offset;
     u8 ret;
 
     if (expr.length != 4) {
@@ -133,29 +152,19 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
     ret = compile_expr(compiler, condition);
     if (ret != COMPILE_OK) return ret;
 
-    module_write_byte(compiler->module, OP_JMF);
-    module_write_byte(compiler->module, 0x00);
-    module_write_byte(compiler->module, 0x00);
-    jmf_save = compiler->module->code.length;
+    jmf_save = emit_jmp(compiler, OP_JMF);
 
     ret = compile_expr(compiler, then_branch);
     if (ret != COMPILE_OK) return ret;
 
-    module_write_byte(compiler->module, OP_JMP);
-    module_write_byte(compiler->module, 0x00);
-    module_write_byte(compiler->module, 0x00);
-    jmp_save = compiler->module->code.length;
+    jmp_save = emit_jmp(compiler, OP_JMP);
 
-    jmf_offset = compiler->module->code.length - jmf_save;
-    compiler->module->code.at[jmf_save-2] = (u8)(((u16)jmf_offset >> 8) & 0xFF);
-    compiler->module->code.at[jmf_save-1] = ((u8) jmf_offset) & 0xFF;
+    patch_jmp(compiler, jmf_save);
 
     ret = compile_expr(compiler, else_branch);
     if (ret != COMPILE_OK) return ret;
 
-    jmp_offset = compiler->module->code.length - jmp_save;
-    compiler->module->code.at[jmp_save-2] = (u8)(((u16)jmp_offset >> 8) & 0xFF);
-    compiler->module->code.at[jmp_save-1] = ((u8) jmp_offset) & 0xFF;
+    patch_jmp(compiler, jmp_save);
 
     return COMPILE_OK;
 }
@@ -169,9 +178,8 @@ u8 compile_function(struct compiler* compiler, struct expr expr) {
 
     ret = compile_args(compiler, CDR(expr));
     if (ret != COMPILE_OK) return ret;
-    module_write_byte(compiler->module, OP_CONSTANT);
-    module_write_byte(compiler->module, module_write_const(compiler->module, CAR(expr)));
-    module_write_byte(compiler->module, OP_CALL);
+    emit_constant(compiler, CAR(expr));
+    emit_byte(compiler, OP_CALL);
 
     return COMPILE_OK;
 }
@@ -213,7 +221,7 @@ u8 compile_builtin_function(struct compiler* compiler, struct expr expr) {
     ret = compile_args(compiler, args);
     if (ret != COMPILE_OK) return ret;
 
-    module_write_byte(compiler->module, fn->op_code);
+    emit_byte(compiler, fn->op_code);
 
     return COMPILE_OK;
 }

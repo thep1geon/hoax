@@ -6,6 +6,7 @@
 
 /* @TODO: Implement strings */
 /* @TODO: Implement dynamic symbols */
+/* @TODO: Implement some sort of garbage collection for the "heap" */
 
 enum expr_type {
     EXPR_NIL,

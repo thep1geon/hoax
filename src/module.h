@@ -1,6 +1,10 @@
 #ifndef __MODULE_H
 #define __MODULE_H
 
+/* @TODO: Consider a rename from module. Maybe just chunk like the rest. That
+ * way we can reserve module for an actual module and not just a sequence of
+ * bytecode and constants */
+
 #include "common.h"
 #include "expr.h"
 

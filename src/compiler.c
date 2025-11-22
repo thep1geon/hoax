@@ -32,8 +32,13 @@ u8 compile(struct compiler* compiler) {
 
     ret = COMPILE_OK;
 
-    // ptr = read_expr(&compiler->reader);
     while ((ptr = read_expr(&compiler->reader)) != 0) {
+
+        /* If we failed to read an expression we can propagate that up */
+        if (ptr == READER_ERROR) {
+            return COMPILE_READER_ERROR;
+        }
+
         ret = compile_expr(compiler, EXPR(ptr));
 
         if (ret != COMPILE_OK) break;

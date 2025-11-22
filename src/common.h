@@ -35,4 +35,7 @@ struct file_location {
 #define ARRAY_FOR_EACH(arr, e) \
     for (usize __iter = 0; __iter < ARRAY_LENGTH((arr)) && ((e = (arr)[__iter]) || true); ++__iter)
 
+#define FOR_RANGE(start, end) \
+    for (usize __iter = (start); __iter < (end); ++__iter)
+
 #endif  /*__COMMON_H*/

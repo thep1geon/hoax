@@ -12,6 +12,7 @@ enum compiler_status {
     COMPILE_EXPECTED_ARGS,
     COMPILE_EXPECTED_SYMBOL,
     COMPILE_MISSING_FUNCTION_ARGS,
+    COMPILE_READER_ERROR,
 };
 
 struct compiler {

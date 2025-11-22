@@ -398,6 +398,7 @@
     }
 
 #define SLICE_FROM_ARR(arr, start, end) {.ptr = (arr)+(start), .length = (end)-(start)}
+#define SUBSLICE(slice, start, end) {.ptr = (slice).ptr+(start), .length = (end)-(start)}
 
 /* 
  * WARN: This macro will evaulate the input the slice multiple times, so

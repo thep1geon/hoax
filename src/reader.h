@@ -3,12 +3,19 @@
 
 #include "common.h"
 
-/* @TODO: Implement a way to convey errors while reading */
+#define READER_ERROR UINT32_MAX
+
+enum reader_error_code {
+    READER_ERROR_UNEXPECTED_CLOSING_PAREN = 1,
+    READER_ERROR_UNEXPECTED_CHARACTER,
+    READER_ERROR_UNEXPECTED_EOF,
+};
 
 struct reader {
     struct slice(char) src;
-    u32 cursor;
     struct file_location current_location;
+    u32 cursor;
+    u32 error_code;
 };
 
 struct reader reader_create(struct slice(char) src);

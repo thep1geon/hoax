@@ -6,7 +6,7 @@
 #include "reader.h"
 
 struct reader reader_create(struct slice(char) src) {
-    return (struct reader){ src, 0, (struct file_location){ 1, 1 } };
+    return (struct reader){ src, (struct file_location){ 1, 1 }, 0, 0 };
 }
 
 static inline void advance(struct reader* reader) {
@@ -120,7 +120,9 @@ read_expr_begin:
         ptr = read_atom(reader);
     }
 
-    EXPR(ptr).loc = loc;
+    if (ptr != READER_ERROR) {
+        EXPR(ptr).loc = loc;
+    }
     return ptr;
 }
 
@@ -133,16 +135,20 @@ u32 read_atom(struct reader* reader) {
         return read_symbol(reader);
     }
 
-    if (char_at(reader) == ')')
+    if (char_at(reader) == ')') {
         fprintf(stderr, "(%d:%d) error: unexpected ')'\n", 
                 reader->current_location.line, reader->current_location.column);
-    else
-        fprintf(stderr, "(%d:%d) error: unknown character: '%c'\n", 
+        reader->error_code = READER_ERROR_UNEXPECTED_CLOSING_PAREN;
+    }
+    else {
+        fprintf(stderr, "(%d:%d) error: unknown character: '%c'\n",
                 reader->current_location.line, reader->current_location.column, char_at(reader));
+        reader->error_code = READER_ERROR_UNEXPECTED_CHARACTER;
+    }
 
     advance(reader);
 
-    return 0;
+    return READER_ERROR;
 }
 
 u32 read_integer(struct reader* reader) {
@@ -199,13 +205,17 @@ u32 read_cons(struct reader* reader) {
         fprintf(stderr, "(%d:%d): error: expected ')', found EOF instead\n",
                 reader->current_location.line,
                 reader->current_location.column);
-        /* @TODO: Find a better way to handle the error */
-        exit(1);
+        reader->error_code = READER_ERROR_UNEXPECTED_EOF;
+        return READER_ERROR;
     }
 
     car = read_expr(reader);
 
+    if (car == READER_ERROR) return car;
+
     cons = expr_new_cons(car, read_cons(reader));
+
+    if (reader->error_code != 0) return READER_ERROR;
 
     EXPR(cons).length = expr_cons_length(EXPR(cons));
 

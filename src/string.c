@@ -15,3 +15,22 @@ bool string_equal(struct slice(char) a, struct slice(char) b) {
 
     return true;
 }
+
+u64 string_hash(struct slice(char) key) {
+    u64 P = 1571;
+    u64 hash = 0; 
+    u64 p = P;
+
+    for (u64 i = 0; i < key.length; ++i) {
+        for (u64 j = 0; j < i; ++j) {
+            p *= P;
+        }
+
+        hash = (hash*(key.length-i)*i + ((u64)*key.ptr+i)*i) << (i);
+        hash += key.length * i * p * (key.ptr[i] * key.ptr[i]);
+        hash *= P*p;
+    }
+
+    return hash;
+}
+

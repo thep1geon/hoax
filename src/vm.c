@@ -2,7 +2,6 @@
 
 #include "vm.h"
 #include "module.h"
-
 void vm_init(struct vm* vm) {
     vm_set_global(vm, STRING("#display"), expr_create_native(native_display, 1));
     vm_set_global(vm, STRING("#hello"), expr_create_native(native_hello, 0));
@@ -12,7 +11,7 @@ void vm_init(struct vm* vm) {
 }
 
 void vm_destroy(struct vm* vm) {
-    map_destroy(&vm->global_map);
+    SMAP_DESTROY(&vm->global_map);
 }
 
 u8 vm_fetch_u8(struct vm* vm) {
@@ -30,11 +29,21 @@ struct expr vm_get_const(struct vm* vm, u8 const_index) {
 }
 
 struct expr vm_get_global(struct vm* vm, struct slice(char) name) {
-    return map_get(&vm->global_map, name);
+    struct option(expr) expr;
+    if ((expr = smap__expr_get(&vm->global_map, name)).is_some) {
+        return expr.item;
+    } else {
+        return expr_create_nil();
+    }
 }
 
 struct expr vm_set_global(struct vm* vm, struct slice(char) name, struct expr expr) {
-    return map_set(&vm->global_map, name, expr);
+    struct option(expr) expr_opt;
+    if ((expr_opt = smap__expr_put(&vm->global_map, name, expr)).is_some) {
+        return expr_opt.item;
+    } else {
+        return expr_create_nil();
+    }
 }
 
 /* 

@@ -7,12 +7,11 @@
 #include "expr.h"
 #include "module.h"
 #include "string.h"
-#include "map.h"
 
 struct vm {
     struct expr stack[STACK_MAX];
     struct module* module;
-    struct map global_map;
+    struct smap(expr) global_map;
     u8* ip;
     u32 sp;
     u8 running : 4;

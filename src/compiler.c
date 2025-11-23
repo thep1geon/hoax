@@ -5,7 +5,7 @@
 #include "compiler.h"
 #include "generics.h"
 
-/* @TODO: Replace this with a map since we have that now */
+/* @TODO: Switch this to a smap since we have generic hashmaps now */
 static struct builtin_function functions[] = {
     { { "+", 1 },             2, OP_ADD },
     { { "-", 1 },             2, OP_SUB },

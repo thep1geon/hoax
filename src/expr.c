@@ -4,6 +4,7 @@
 #include "native.h"
 
 DYNARRAY_IMPL_S(expr);
+SMAP_IMPL_S(expr);
 
 struct dynarray(expr) exprs = {0};
 

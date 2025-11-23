@@ -10,7 +10,6 @@
 #include "vm.h"
 #include "compiler.h"
 #include "builtin.h"
-#include "map.h"
 
 #define INPUT_BUFFER_CAP KILOBYTES(1)
 

@@ -50,6 +50,7 @@ struct expr {
 };
 
 DYNARRAY_DECL_S(expr);
+SMAP_DECL_S(expr);
 
 extern struct dynarray(expr) exprs;
 

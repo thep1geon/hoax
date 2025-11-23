@@ -19,4 +19,6 @@ struct slice(char) string_from_parts(char* ptr, usize length);
 
 bool string_equal(struct slice(char) a, struct slice(char) b);
 
+u64 string_hash(struct slice(char) key);
+
 #endif  /*__STRING_H*/

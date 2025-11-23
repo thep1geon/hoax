@@ -113,8 +113,6 @@
 
 #include "typedef.h"
 
-/* @TODO: Think about making a generic string-hashmap */
-
 /* Dynamic Arrays */
 
 #define dynarray(T) dynarray__##T
@@ -398,7 +396,7 @@
     }
 
 #define SLICE_FROM_ARR(arr, start, end) {.ptr = (arr)+(start), .length = (end)-(start)}
-#define SUBSLICE(slice, start, end) {.ptr = (slice).ptr+(start), .length = (end)-(start)}
+#define SUBSLICE(slice, start, end) SLICE_FROM_ARR((slice).ptr, start, end)
 
 /* 
  * WARN: This macro will evaulate the input the slice multiple times, so
@@ -407,5 +405,160 @@
 #define SLICE_FOR_EACH(slice, e)\
     for (usize __iter = 0; __iter < (slice).length && ((e = (slice).ptr[__iter]), true); ++__iter)
 
+/* String HashMaps */
+
+/*
+ * It would be far too complicated to have a fully generic hashmap type, but
+ * having a string hashmap would be much simpler to implement and is more commonly
+ * used. If we need a different key type for a hashmap for whatever reason, it
+ * would probably be best to use a different hashmap implementation all together.
+ * */
+
+#define SMAP_DEFAULT_SIZE (1024)
+
+#define smap(T) smap__##T
+#define smap_slot(T) smap_slot__##T
+
+#define SMAP_SLOT_DECL(T) struct smap_slot(T) { struct slice(char) key; T value; bool occupied; }
+#define SMAP_SLOT_DECL_S(T) struct smap_slot(T) { struct slice(char) key; struct T value; bool occupied; }
+
+#define SMAP_DECL(T)\
+    SMAP_SLOT_DECL(T);\
+    OPTION_DECL(T);\
+    struct smap(T) {\
+        struct smap_slot(T)* slots;\
+        u64 size;\
+    };\
+    struct smap(T) smap__##T##_create(u64 map_size);\
+    void smap__##T##_init(struct smap(T)*, u64 map_size);\
+    struct option(T) smap__##T##_get(struct smap(T)*, struct slice(char));\
+    struct option(T) smap__##T##_put(struct smap(T)*, struct slice(char), T)
+
+#define SMAP_DECL_S(T)\
+    SMAP_SLOT_DECL_S(T);\
+    OPTION_DECL_S(T);\
+    struct smap(T) {\
+        struct smap_slot(T)* slots;\
+        u64 size;\
+    };\
+    struct smap(T) smap__##T##_create(u64 map_size);\
+    void smap__##T##_init(struct smap(T)*, u64 map_size);\
+    struct option(T) smap__##T##_get(struct smap(T)*, struct slice(char));\
+    struct option(T) smap__##T##_put(struct smap(T)*, struct slice(char), struct T)
+
+#define SMAP_IMPL(T)\
+    struct smap(T) smap__##T##_create(u64 map_size) {\
+        struct smap(T) map = {0};\
+        smap__##T##_init(&map, map_size);\
+        return map;\
+    }\
+    void smap__##T##_init(struct smap(T)* map, u64 map_size) {\
+        map->size = map_size;\
+        map->slots = calloc(map->size, sizeof(struct smap_slot(T)));\
+        assert(map->slots);\
+    }\
+    struct option(T) smap__##T##_get(struct smap(T)* map, struct slice(char) key) {\
+        u64 hash;\
+        u64 initial_hash;\
+        struct smap_slot(T) slot;\
+        if (map->size == 0) return OPTION_NONE(T);\
+        hash = SMAP_COMPUTE_HASH(map, key);\
+        initial_hash = hash;\
+        while (map->slots[hash].occupied && !string_equal(key, map->slots[hash].key)) {\
+            hash += 1;\
+            hash %= (map->size);\
+            if (hash == initial_hash) return OPTION_NONE(T);\
+        }\
+        slot = map->slots[hash];\
+        if (!slot.occupied) return OPTION_NONE(T);\
+        return OPTION_SOME(T, slot.value);\
+    }\
+    struct option(T) smap__##T##_put(struct smap(T)* map, struct slice(char) key, T value) {\
+        u64 hash;\
+        struct option(T) old_value;\
+        if (map->size == 0) smap__##T##_init(map, SMAP_DEFAULT_SIZE);\
+        old_value = OPTION_NONE(T);\
+        hash = SMAP_COMPUTE_HASH(map, key);\
+        if (!map->slots[hash].occupied) {\
+            map->slots[hash].key = key;\
+            map->slots[hash].value = value;\
+            map->slots[hash].occupied = true;\
+        } else {\
+            while (map->slots[hash].occupied && !string_equal(key, map->slots[hash].key)) {\
+                hash += 1;\
+                hash %= (map->size);\
+            }\
+            if (!map->slots[hash].occupied) {\
+                map->slots[hash].key = key;\
+                map->slots[hash].value = value;\
+                map->slots[hash].occupied = true;\
+            } else {\
+                old_value = OPTION_SOME(T, map->slots[hash].value);\
+                map->slots[hash].value = value;\
+            }\
+        }\
+        return old_value;\
+    }
+
+#define SMAP_IMPL_S(T)\
+    struct smap(T) smap__##T##_create(u64 map_size) {\
+        struct smap(T) map = {0};\
+        smap__##T##_init(&map, map_size);\
+        return map;\
+    }\
+    void smap__##T##_init(struct smap(T)* map, u64 map_size) {\
+        map->size = map_size;\
+        map->slots = calloc(map->size, sizeof(struct smap_slot(T)));\
+        assert(map->slots);\
+    }\
+    struct option(T) smap__##T##_get(struct smap(T)* map, struct slice(char) key) {\
+        u64 hash;\
+        u64 initial_hash;\
+        struct smap_slot(T) slot;\
+        if (map->size == 0) return OPTION_NONE(T);\
+        hash = SMAP_COMPUTE_HASH(map, key);\
+        initial_hash = hash;\
+        while (map->slots[hash].occupied && !string_equal(key, map->slots[hash].key)) {\
+            hash += 1;\
+            hash %= (map->size);\
+            if (hash == initial_hash) return OPTION_NONE(T);\
+        }\
+        slot = map->slots[hash];\
+        if (!slot.occupied) return OPTION_NONE(T);\
+        return OPTION_SOME(T, slot.value);\
+    }\
+    struct option(T) smap__##T##_put(struct smap(T)* map, struct slice(char) key, struct T value) {\
+        u64 hash;\
+        struct option(T) old_value;\
+        if (map->size == 0) smap__##T##_init(map, SMAP_DEFAULT_SIZE);\
+        old_value = OPTION_NONE(T);\
+        hash = SMAP_COMPUTE_HASH(map, key);\
+        if (!map->slots[hash].occupied) {\
+            map->slots[hash].key = key;\
+            map->slots[hash].value = value;\
+            map->slots[hash].occupied = true;\
+        } else {\
+            while (map->slots[hash].occupied && !string_equal(key, map->slots[hash].key)) {\
+                hash += 1;\
+                hash %= (map->size);\
+            }\
+            if (!map->slots[hash].occupied) {\
+                map->slots[hash].key = key;\
+                map->slots[hash].value = value;\
+                map->slots[hash].occupied = true;\
+            } else {\
+                old_value = OPTION_SOME(T, map->slots[hash].value);\
+                map->slots[hash].value = value;\
+            }\
+        }\
+        return old_value;\
+    }
+
+#define SMAP_DESTROY(smap) do {\
+    free((smap)->slots);\
+    (smap)->size = 0;\
+} while (0)
+
+#define SMAP_COMPUTE_HASH(smap, key) string_hash(key) % (smap)->size
 
 #endif  /*__GENERICS_H*/

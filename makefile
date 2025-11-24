@@ -6,6 +6,9 @@ TARGET := $(TARGET_DIR)/hoax
 # Find all .c files in subdirectories of SRC_DIR
 SRC_FILES := $(shell find $(SRC_DIR) -type f -name "*.c")
 
+# All the header files
+HEADER_FILES := $(shell find $(SRC_DIR) -type f -name "*.h")
+
 # Generate object file paths based on source file paths
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))
 
@@ -19,9 +22,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
 	gcc $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJ_FILES)
+$(TARGET): $(OBJ_FILES) $(HEADER_FILES)
 	@mkdir -p $(@D)
-	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+	gcc $(CFLAGS) $(OBJ_FILES) -o $@ $(LIBS)
 
 run: $(TARGET)
 	$(TARGET)

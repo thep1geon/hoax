@@ -11,16 +11,32 @@ void compiler_init(struct compiler* compiler, struct slice(char) src, struct mod
     compiler->reader = reader_create(src);
     compiler->module = module;
 
-    /* @TODO: Simplify this */
-    smap__builtin_function_info_put(&compiler->builtins, STRING("+"),            (struct builtin_function_info){2, OP_ADD});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("-"),            (struct builtin_function_info){2, OP_SUB});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("*"),            (struct builtin_function_info){2, OP_MUL});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("/"),            (struct builtin_function_info){2, OP_DIV});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("car"),          (struct builtin_function_info){1, OP_CAR});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("cdr"),          (struct builtin_function_info){1, OP_CDR});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("cons"),         (struct builtin_function_info){1, OP_CONS});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("quit"),         (struct builtin_function_info){0, OP_HALT});
-    smap__builtin_function_info_put(&compiler->builtins, STRING("toggle-debug"), (struct builtin_function_info){0, OP_TOGGLE_DEBUG});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("+"),
+                                    (struct builtin_function_info){2, OP_ADD});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("-"),
+                                    (struct builtin_function_info){2, OP_SUB});
+    
+    smap__builtin_function_info_put(&compiler->builtins, STRING("*"),
+                                    (struct builtin_function_info){2, OP_MUL});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("/"),
+                                    (struct builtin_function_info){2, OP_DIV});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("car"),
+                                    (struct builtin_function_info){1, OP_CAR});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("cdr"),
+                                    (struct builtin_function_info){1, OP_CDR});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("cons"),
+                                    (struct builtin_function_info){1, OP_CONS});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("quit"),
+                                    (struct builtin_function_info){0, OP_HALT});
+
+    smap__builtin_function_info_put(&compiler->builtins, STRING("toggle-debug"),
+                                    (struct builtin_function_info){0, OP_TOGGLE_DEBUG});
 }
 
 void compiler_destroy(struct compiler* compiler) {
@@ -104,9 +120,8 @@ u8 compile_symbol(struct compiler* compiler, struct expr expr) {
     } else if (memcmp(expr.symbol, "nil", 3) == 0) {
         emit_byte(compiler, OP_NIL);
     } else {
-        fprintf(stderr, "(%d:%d) error: unknown builtin symbol: %.*s\n", 
-                expr.loc.line, expr.loc.column, expr.length, expr.symbol);
-        return COMPILE_UNKOWN_SYMBOL;
+        emit_constant(compiler, expr);
+        emit_byte(compiler, OP_LOAD_VAR);
     }
 
     return COMPILE_OK;

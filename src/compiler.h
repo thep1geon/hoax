@@ -7,7 +7,6 @@
 #include "generics.h"
 #include "builtin.h"
 
-/* @TODO: Implement compilation of symbols */
 /* @TODO: Implement global variables */
 /* @TODO: Implement let expressions */
 /* @TODO: Implement user defined functions */

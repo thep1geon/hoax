@@ -85,6 +85,9 @@ void module_disassemble(struct module* module) {
             case OP_TOGGLE_DEBUG:
                 puts("OP_TOGGLE_DEBUG");
                 break;
+            case OP_LOAD_VAR:
+                puts("OP_LOAD_VAR");
+                break;
             case OP_CONSTANT:
                 offset += 1;
                 const_index = module->code.at[offset];

@@ -28,9 +28,13 @@ struct expr vm_get_const(struct vm* vm, u8 const_index) {
     return vm->module->constants.at[const_index];
 }
 
+struct option(expr) __vm_get_global(struct vm* vm, struct slice(char) name) {
+    return smap__expr_get(&vm->global_map, name) ;
+}
+
 struct expr vm_get_global(struct vm* vm, struct slice(char) name) {
     struct option(expr) expr;
-    if ((expr = smap__expr_get(&vm->global_map, name)).is_some) {
+    if ((expr = __vm_get_global(vm, name)).is_some) {
         return expr.item;
     } else {
         return expr_create_nil();
@@ -85,6 +89,19 @@ struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
     return expr_native_call(func, EXPR(args));
 }
 
+struct expr vm_load_var(struct vm* vm, struct slice(char) name) {
+    struct expr expr = expr_create_nil();
+    struct option(expr) opt_expr;
+
+    if ((opt_expr = __vm_get_global(vm, name)).is_some) {
+        expr = opt_expr.item;
+    } else {
+        fprintf(stderr, "%.*s is not defined\n", STRINGF(name));
+    }
+
+    return expr;
+}
+
 struct expr vm_push(struct vm* vm, struct expr expr) {
     return vm->stack[vm->sp++] = expr;
 }
@@ -114,6 +131,14 @@ struct expr vm_run(struct vm* vm, struct module* module) {
             case OP_CONSTANT:
                 expr = vm_get_const(vm, vm_fetch_u8(vm));
                 vm_push(vm, expr);
+                break;
+            case OP_LOAD_VAR:
+                expr = vm_pop(vm);
+                assert(symbolp(expr));
+                vm_push(vm, vm_load_var(
+                    vm,
+                    (struct slice(char)){.ptr = expr.symbol, .length = expr.length}
+                ));
                 break;
             case OP_ADD:
                 a = vm_pop(vm);

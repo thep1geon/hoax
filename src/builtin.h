@@ -5,12 +5,21 @@
 #include "common.h"
 
 /* @TODO: See about implementing compile-time type checking for builtin-functions */
+
+/* 
+ * @TODO: See about updating these here. They just feel very hacked together
+ * and rushed
+ * */
+struct builtin_function_info {
+    u8 arity;
+    u8 op_code;
+};
+
+SMAP_DECL_S(builtin_function_info);
+
 struct builtin_function {
     struct slice(char) name;
-    u8 arity;
-    u16 op_code;
-
-    /* u8 padding */
+    struct builtin_function_info info;
 };
 
 /*

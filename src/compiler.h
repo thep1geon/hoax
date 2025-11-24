@@ -4,6 +4,8 @@
 #include "module.h"
 #include "expr.h"
 #include "reader.h"
+#include "generics.h"
+#include "builtin.h"
 
 enum compiler_status {
     COMPILE_OK,
@@ -16,8 +18,9 @@ enum compiler_status {
 };
 
 struct compiler {
-    struct reader reader;
     struct module* module;
+    struct reader reader;
+    struct smap(builtin_function_info) builtins;
 };
 
 /* 
@@ -26,6 +29,8 @@ struct compiler {
  * */
 
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module);
+
+void compiler_destroy(struct compiler* compiler);
 
 u8 compile(struct compiler* compiler);
 u8 compile_expr(struct compiler* compiler, struct expr expr);

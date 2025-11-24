@@ -11,9 +11,7 @@
 #include "compiler.h"
 #include "builtin.h"
 
-#define INPUT_BUFFER_CAP KILOBYTES(1)
-
-SLICE_DECL_S(slice__char);
+#define INPUT_BUFFER_CAP (KILOBYTES(1))
 
 /* @TODO: Implement readline functionality into the repl for a better experience */
 void repl() {
@@ -64,6 +62,7 @@ void repl() {
 
     if (compiler.module)
         module_destroy(compiler.module);
+    compiler_destroy(&compiler);
     vm_destroy(&vm);
     DYNARRAY_FREE(&exprs);
 }
@@ -108,6 +107,7 @@ void file(char* filename) {
         vm_run(&vm, compiler.module);
 
     module_destroy(compiler.module);
+    compiler_destroy(&compiler);
     DYNARRAY_FREE(&exprs);
     vm_destroy(&vm);
     free(file_contents);

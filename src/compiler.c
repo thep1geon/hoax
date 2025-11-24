@@ -5,22 +5,26 @@
 #include "compiler.h"
 #include "generics.h"
 
-/* @TODO: Switch this to a smap since we have generic hashmaps now */
-static struct builtin_function functions[] = {
-    { { "+", 1 },             2, OP_ADD },
-    { { "-", 1 },             2, OP_SUB },
-    { { "*", 1 },             2, OP_MUL },
-    { { "/", 1 },             2, OP_DIV },
-    { { "car", 3 },           1, OP_CAR },
-    { { "cdr", 3 },           1, OP_CDR },
-    { { "cons", 4 },          2, OP_CONS },
-    { { "quit", 4 },          0, OP_HALT },
-    { { "toggle-debug", 12 }, 0, OP_TOGGLE_DEBUG },
-};
+SMAP_IMPL_S(builtin_function_info);
 
 void compiler_init(struct compiler* compiler, struct slice(char) src, struct module* module) {
     compiler->reader = reader_create(src);
     compiler->module = module;
+
+    /* @TODO: Simplify this */
+    smap__builtin_function_info_put(&compiler->builtins, STRING("+"),            (struct builtin_function_info){2, OP_ADD});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("-"),            (struct builtin_function_info){2, OP_SUB});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("*"),            (struct builtin_function_info){2, OP_MUL});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("/"),            (struct builtin_function_info){2, OP_DIV});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("car"),          (struct builtin_function_info){1, OP_CAR});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("cdr"),          (struct builtin_function_info){1, OP_CDR});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("cons"),         (struct builtin_function_info){1, OP_CONS});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("quit"),         (struct builtin_function_info){0, OP_HALT});
+    smap__builtin_function_info_put(&compiler->builtins, STRING("toggle-debug"), (struct builtin_function_info){0, OP_TOGGLE_DEBUG});
+}
+
+void compiler_destroy(struct compiler* compiler) {
+    SMAP_DESTROY(&compiler->builtins);
 }
 
 static inline u8 emit_byte(struct compiler* compiler, u8 byte) {
@@ -186,42 +190,31 @@ u8 compile_function(struct compiler* compiler, struct expr expr) {
 
 u8 compile_builtin_function(struct compiler* compiler, struct expr expr) {
     u8 ret;
-    u32 i;
 
-    struct builtin_function* fn = 0;
+    struct option(builtin_function_info) fn = {0};
 
     struct expr car = CAR(expr);
     struct expr args = CDR(expr);
 
-    /* Search for the function in the table of functions */
-    for (i = 0; i < ARRAY_LENGTH(functions); ++i) {
-        fn = functions + i;
+    struct slice(char) fn_name = {car.symbol, car.length};
 
-        if (fn->name.length == car.length) {
-            if (memcmp(fn->name.ptr, car.symbol, car.length) == 0) {
-                break;
-            }
-        }
+    fn = smap__builtin_function_info_get(&compiler->builtins, fn_name);
 
-        fn = 0;
-    }
-
-    /* check to make sure we got a function */
-    if (fn == 0) {
+    if (!fn.is_some) {
         return COMPILE_UNKOWN_FUNCTION;
     }
 
     /* do a compile time check of the number of arguments required by that function */
-    if (args.length != fn->arity) {
+    if (args.length != fn.item.arity) {
         fprintf(stderr, "(%d:%d) error: '%.*s' takes %d arguments but only %d were provided\n", 
-                car.loc.line, car.loc.column, car.length, car.symbol, fn->arity, args.length);
+                car.loc.line, car.loc.column, car.length, car.symbol, fn.item.arity, args.length);
         return COMPILE_MISSING_FUNCTION_ARGS;
     }
 
     ret = compile_args(compiler, args);
     if (ret != COMPILE_OK) return ret;
 
-    emit_byte(compiler, fn->op_code);
+    emit_byte(compiler, fn.item.op_code);
 
     return COMPILE_OK;
 }

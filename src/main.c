@@ -16,21 +16,17 @@
 
 /* @TODO: Implement readline functionality into the repl for a better experience */
 void repl() {
-    struct vm vm;
-    struct module module;
     struct slice(char) input;
     struct expr expr;
-    struct compiler compiler;
     char input_buffer[INPUT_BUFFER_CAP];
+
+    struct vm vm = {0};
+    struct module module = {0};
+    struct compiler compiler = {0};
 
     expr_new_nil();
 
-    vm = (struct vm){0};
     vm_init(&vm);
-
-    module = (struct module){0};
-
-    compiler = (struct compiler){0};
 
     printf("(hoax)>> ");
     while (vm.running && fgets(input_buffer, INPUT_BUFFER_CAP, stdin)) {
@@ -76,13 +72,14 @@ void repl() {
 }
 
 void file(char* filename) {
-    struct vm vm;
-    struct module module;
     struct slice(char) src;
-    struct compiler compiler;
     char* file_contents;
     FILE* fp;
     usize file_size;
+
+    struct vm vm = {0};
+    struct module module = {0};
+    struct compiler compiler = {0};
 
     fp = fopen(filename, "r");
     if (!fp) {
@@ -103,11 +100,7 @@ void file(char* filename) {
 
     expr_new_nil();
 
-    vm = (struct vm){0};
     vm_init(&vm);
-    module = (struct module){0};
-
-    compiler = (struct compiler){0};
 
     compiler_init(&compiler, src, &module);
 

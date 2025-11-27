@@ -88,6 +88,9 @@ void module_disassemble(struct module* module) {
             case OP_LOAD_VAR:
                 puts("OP_LOAD_VAR");
                 break;
+            case OP_STORE_VAR:
+                puts("OP_STORE_VAR");
+                break;
             case OP_CONSTANT:
                 offset += 1;
                 const_index = module->code.at[offset];

@@ -28,6 +28,23 @@ struct expr vm_get_const(struct vm* vm, u8 const_index) {
     return vm->module->constants.at[const_index];
 }
 
+void vm_dump_globals(struct vm* vm) {
+    u64 i = 0;
+    struct smap_slot(expr) slot;
+
+    fprintf(stderr, "Virtual Machine Variables:\n");
+    for (i = 0; i < vm->global_map.size; ++i) {
+        slot = vm->global_map.slots[i];
+
+        if (!slot.occupied) continue;
+
+        fprintf(stderr, "Key: %.*s, Value: ", STRINGF(slot.key));
+        expr_fprintln(stderr, slot.value);
+    }
+}
+
+// struct option(expr) -> struct option__expr
+
 struct option(expr) __vm_get_global(struct vm* vm, struct slice(char) name) {
     return smap__expr_get(&vm->global_map, name) ;
 }
@@ -50,6 +67,27 @@ struct expr vm_set_global(struct vm* vm, struct slice(char) name, struct expr ex
     }
 }
 
+struct expr vm_load_var(struct vm* vm, struct slice(char) name) {
+    struct expr expr = expr_create_nil();
+    struct option(expr) opt_expr;
+
+    if ((opt_expr = __vm_get_global(vm, name)).is_some) {
+        expr = opt_expr.item;
+    } else {
+        fprintf(stderr, "%.*s is not defined\n", STRINGF(name));
+    }
+
+    return expr;
+}
+
+struct expr vm_store_var(struct vm* vm, struct slice(char) name) {
+    struct expr expr = vm_pop(vm);
+
+    vm_set_global(vm, name, expr);
+
+    return expr;
+}
+
 /* 
  * @TODO: Figure out if there is a better way of passing arguments on the stack.
  *
@@ -63,11 +101,10 @@ struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
     u32 args;
 
 
-    func = vm_get_global(vm, name);
+    func = vm_load_var(vm, name);
 
     /* the function was not found */
     if (nilp(func)) {
-        fprintf(stderr, "%.*s was not found\n", STRINGF(name));
         return expr_create_nil();
     }
 
@@ -87,19 +124,6 @@ struct expr vm_function_call(struct vm* vm, struct slice(char) name) {
     args = expr_cons_reverse(args);
 
     return expr_native_call(func, EXPR(args));
-}
-
-struct expr vm_load_var(struct vm* vm, struct slice(char) name) {
-    struct expr expr = expr_create_nil();
-    struct option(expr) opt_expr;
-
-    if ((opt_expr = __vm_get_global(vm, name)).is_some) {
-        expr = opt_expr.item;
-    } else {
-        fprintf(stderr, "%.*s is not defined\n", STRINGF(name));
-    }
-
-    return expr;
 }
 
 struct expr vm_push(struct vm* vm, struct expr expr) {
@@ -136,6 +160,14 @@ struct expr vm_run(struct vm* vm, struct module* module) {
                 expr = vm_pop(vm);
                 assert(symbolp(expr));
                 vm_push(vm, vm_load_var(
+                    vm,
+                    (struct slice(char)){.ptr = expr.symbol, .length = expr.length}
+                ));
+                break;
+            case OP_STORE_VAR:
+                expr = vm_pop(vm);
+                assert(symbolp(expr));
+                vm_push(vm, vm_store_var(
                     vm,
                     (struct slice(char)){.ptr = expr.symbol, .length = expr.length}
                 ));

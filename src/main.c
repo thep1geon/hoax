@@ -10,6 +10,7 @@
 #include "vm.h"
 #include "compiler.h"
 #include "builtin.h"
+#include "arena.h"
 
 #define INPUT_BUFFER_CAP (KILOBYTES(1))
 
@@ -26,6 +27,7 @@ void repl() {
 
     vm = (struct vm){0};
     vm_init(&vm);
+
     module = (struct module){0};
 
     compiler = (struct compiler){0};
@@ -52,6 +54,10 @@ void repl() {
             if (!nilp(expr)) expr_println(expr);
         }
 
+        if (vm.debug)
+            vm_dump_globals(&vm);
+
+
         if (vm.running)
             printf("(hoax)>> ");
 
@@ -62,9 +68,11 @@ void repl() {
 
     if (compiler.module)
         module_destroy(compiler.module);
+
     compiler_destroy(&compiler);
-    vm_destroy(&vm);
     DYNARRAY_FREE(&exprs);
+    arena_destroy(&expr_arena);
+    vm_destroy(&vm);
 }
 
 void file(char* filename) {
@@ -103,15 +111,19 @@ void file(char* filename) {
 
     compiler_init(&compiler, src, &module);
 
-    if (compile(&compiler) == COMPILE_OK)
+    if (compile(&compiler) == COMPILE_OK) {
+        free(file_contents);
         vm_run(&vm, compiler.module);
+    }
 
     module_destroy(compiler.module);
     compiler_destroy(&compiler);
     DYNARRAY_FREE(&exprs);
+    arena_destroy(&expr_arena);
     vm_destroy(&vm);
-    free(file_contents);
 }
+
+SLICE_DECL(int);
 
 i32 main(i32 argc, char** argv) {
     UNUSED(argc);

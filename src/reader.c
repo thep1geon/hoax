@@ -170,14 +170,18 @@ u32 read_integer(struct reader* reader) {
 }
 
 u32 read_symbol(struct reader* reader) {
-    u8 length = 1;
-    char* symbol = reader->src.ptr + reader->cursor;
-    advance(reader);
+    char symbol_buffer[256] = {0};
+    u8 length = 0;
+    char* symbol;
 
     while (is_symbol(char_at(reader)) && bound(reader)) {
+        symbol_buffer[length] = char_at(reader);
         advance(reader);
         length += 1;
     }
+
+    symbol = arena_alloc(&expr_arena, length);
+    memcpy(symbol, symbol_buffer, length);
 
     return expr_new_symbol(symbol, length);
 }

@@ -39,6 +39,7 @@ enum op_code {
 
     /* loading a variable from a symbol */
     OP_LOAD_VAR,
+    OP_STORE_VAR,
 
     /* Stopping the vm in some way */
     OP_RETURN,

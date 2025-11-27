@@ -172,7 +172,7 @@
 
 #define DYNARRAY_CLEAR(da) (da)->length = 0
 
-#define DYNARRAY_FREE(da) free((da)->at);
+#define DYNARRAY_FREE(da) do { DYNARRAY_CLEAR(da); free((da)->at); } while (0)
 
 #define DYNARRAY_POP(da) (da)->at[--(da)->length]
 
@@ -405,7 +405,7 @@
 #define SLICE_FOR_EACH(slice, e)\
     for (usize __iter = 0; __iter < (slice).length && ((e = (slice).ptr[__iter]), true); ++__iter)
 
-/* String HashMaps */
+/* String HashMaps -> SMap */
 
 /*
  * It would be far too complicated to have a fully generic hashmap type, but

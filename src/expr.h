@@ -1,11 +1,12 @@
 #ifndef __EXPR_H
 #define __EXPR_H
 
+#include "arena.h"
 #include "common.h"
 #include "native.h"
 
-/* @TODO: Implement strings */
 /* @TODO: Implement dynamic symbols */
+/* @TODO: Implement strings */
 /* @TODO: Implement floating point numbers */
 /* @TODO: Implement some sort of garbage collection for the "heap" */
 
@@ -24,8 +25,7 @@ struct expr {
         bool boolean;
         i64 integer;
         /* 
-         * Pointer into the source string. This way we don't have to worry about
-         * freeing the expression's string.
+         * Pointer to the string stored in the expr arena allocator.
          *
          * The length of this string is stored outside of the union to bypass
          * the padding of a struct of a pointer and a u8 inside of the union.
@@ -54,6 +54,7 @@ DYNARRAY_DECL_S(expr);
 SMAP_DECL_S(expr);
 
 extern struct dynarray(expr) exprs;
+extern struct arena expr_arena;
 
 u32 expr_box(struct expr expr);
 

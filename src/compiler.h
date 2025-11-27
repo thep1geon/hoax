@@ -7,6 +7,7 @@
 #include "generics.h"
 #include "builtin.h"
 
+/* @TODO: Implment quoting */
 /* @TODO: Implement global variables */
 /* @TODO: Implement let expressions */
 /* @TODO: Implement user defined functions */
@@ -41,6 +42,7 @@ u8 compile_expr(struct compiler* compiler, struct expr expr);
 u8 compile_symbol(struct compiler* compiler, struct expr expr);
 u8 compile_list(struct compiler* compiler, struct expr expr);
 u8 compile_if(struct compiler* compiler, struct expr expr);
+u8 compile_defvar(struct compiler* compiler, struct expr expr);
 u8 compile_builtin_function(struct compiler* compiler, struct expr expr);
 u8 compile_function(struct compiler* compiler, struct expr expr);
 u8 compile_args(struct compiler* compiler, struct expr expr);

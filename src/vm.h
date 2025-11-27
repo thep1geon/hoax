@@ -21,11 +21,13 @@ struct vm {
 void vm_init(struct vm* vm);
 void vm_destroy(struct vm* vm);
 
+
 u8 vm_fetch_u8(struct vm* vm);
 u16 vm_fetch_u16(struct vm* vm);
 
 struct expr vm_get_const(struct vm* vm, u8 const_index);
 
+void vm_dump_globals(struct vm* vm);
 struct expr vm_get_global(struct vm* vm, struct slice(char) name);
 struct expr vm_set_global(struct vm* vm, struct slice(char) name, struct expr expr);
 

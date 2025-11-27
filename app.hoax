@@ -46,3 +46,11 @@
 (#display (if () 3 9))
 (#display (if nil 3 9))
 (#display (if 0 3 9))
+
+;; Variables!
+
+(defvar baz #display)
+(defvar add #+)
+
+(baz (add 3 4))
+(baz baz)

@@ -30,7 +30,7 @@ void compiler_init(struct compiler* compiler, struct slice(char) src, struct mod
                                     (struct builtin_function_info){1, OP_CDR});
 
     smap__builtin_function_info_put(&compiler->builtins, STRING("cons"),
-                                    (struct builtin_function_info){1, OP_CONS});
+                                    (struct builtin_function_info){2, OP_CONS});
 
     smap__builtin_function_info_put(&compiler->builtins, STRING("quit"),
                                     (struct builtin_function_info){0, OP_HALT});
@@ -113,11 +113,11 @@ u8 compile_symbol(struct compiler* compiler, struct expr expr) {
      * We probably won't have to do the whole table thing for symbols because
      * I don't foresee having to lookup that many more symbols
      * */
-    if (memcmp(expr.symbol, "t", 1) == 0) {
+    if (expr.length == 1 && memcmp(expr.symbol, "t", 1) == 0) {
         emit_byte(compiler, OP_TRUE);
-    } else if (memcmp(expr.symbol, "f", 1) == 0) {
+    } else if (expr.length == 1 && memcmp(expr.symbol, "f", 1) == 0) {
         emit_byte(compiler, OP_FALSE);
-    } else if (memcmp(expr.symbol, "nil", 3) == 0) {
+    } else if (expr.length == 3 && memcmp(expr.symbol, "nil", 3) == 0) {
         emit_byte(compiler, OP_NIL);
     } else {
         emit_constant(compiler, expr);
@@ -145,6 +145,8 @@ u8 compile_list(struct compiler* compiler, struct expr expr) {
      * */
     if (memcmp(CAR(expr).symbol, "if", 2) == 0)
         return compile_if(compiler, expr);
+    else if (memcmp(CAR(expr).symbol, "defvar", 6) == 0)
+        return compile_defvar(compiler, expr);
 
     return compile_function(compiler, expr);
 }
@@ -184,6 +186,41 @@ u8 compile_if(struct compiler* compiler, struct expr expr) {
     if (ret != COMPILE_OK) return ret;
 
     patch_jmp(compiler, jmp_save);
+
+    return COMPILE_OK;
+}
+
+u8 compile_defvar(struct compiler* compiler, struct expr expr)  {
+    u8 ret;
+    struct expr name;
+    struct expr value;
+
+    if (expr.length != 3) {
+        fprintf(stderr, "(%d:%d) error: defvar expressions must have 3 parts:\n\t'",
+                expr.loc.line, expr.loc.column);
+        expr_fprint(stderr, expr);
+        fprintf(stderr, "'\n");
+        return COMPILE_EXPECTED_ARGS;
+    }
+
+    name = CAR(CDR(expr));
+    value = CAR(CDR(CDR(expr)));
+
+    if (!symbolp(name)) {
+        fprintf(stderr, "(%d:%d) error: defvar expects a symbol as the first arg:\n\t'",
+                expr.loc.line, expr.loc.column);
+        expr_fprint(stderr, expr);
+        fprintf(stderr, "'\n");
+        return COMPILE_EXPECTED_SYMBOL;
+    }
+
+    ret = compile_expr(compiler, value);
+    if (ret != COMPILE_OK) return ret;
+
+    emit_constant(compiler, name);
+
+    emit_byte(compiler, OP_STORE_VAR);
+
 
     return COMPILE_OK;
 }

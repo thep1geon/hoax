@@ -7,6 +7,7 @@ DYNARRAY_IMPL_S(expr);
 SMAP_IMPL_S(expr);
 
 struct dynarray(expr) exprs = {0};
+struct arena expr_arena = {0};
 
 u32 expr_box(struct expr expr) {
     /* The dynarray is too full for our needs */

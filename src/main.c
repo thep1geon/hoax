@@ -116,8 +116,6 @@ void file(char* filename) {
     vm_destroy(&vm);
 }
 
-SLICE_DECL(int);
-
 i32 main(i32 argc, char** argv) {
     UNUSED(argc);
     UNUSED(argv);
